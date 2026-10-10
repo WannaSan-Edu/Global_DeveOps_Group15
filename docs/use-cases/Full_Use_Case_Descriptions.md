@@ -1,5 +1,6 @@
 ## Use Case Diagram
 
+[Open the editable Use Case Diagram](Population_Reporting_System_Use_Case.drawio)
 ![Population Reporting System Use Case Diagram](Population_Reporting_System_Use_Case_Diagram.png)
 
 
