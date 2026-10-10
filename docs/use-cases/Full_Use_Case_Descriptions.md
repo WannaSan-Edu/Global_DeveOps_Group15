@@ -1,6 +1,6 @@
 ## Use Case Diagram
 
-![Population Reporting System Use Case Diagram](Population_Reporting_Use_Case_Diagram.png)
+![Population Reporting System Use Case Diagram](Population_Reporting_System_Use_Case_Diagram.png)
 
 
 ## Use Case Diagram Summary
