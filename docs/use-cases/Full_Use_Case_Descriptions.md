@@ -1,3 +1,18 @@
+## Use Case Diagram
+
+![Population Reporting System Use Case Diagram](Population_Reporting_Use_Case_Diagram.png)
+
+
+## Use Case Diagram Summary
+
+The Use Case Diagram shows the main functions of the Population Reporting System and how the user interacts with the system. It contains 32 use cases grouped into country reports, city reports, capital city reports, population distribution reports, additional population reports, and language reports.
+
+The system allows the user to view population information for the world, continents, regions, countries, districts, and cities. It also provides reports of the most populated countries, cities, and capital cities.
+
+The Population Distribution Reports show total population, the population living in cities, and the population not living in cities, including percentages. The Language Report shows the number of speakers of Chinese, English, Hindi, Spanish, and Arabic, together with their percentages of the world population.
+
+Overall, the diagram provides an overview of the system's reporting functions and supports the detailed use case descriptions in this document.
+
 
 # Full Use Case Descriptions
 
