@@ -99,75 +99,75 @@ Each use case is documented in a separate Markdown file. The individual specific
 
 ### 3.1 Country Reports
 
-| Use Case ID | Use Case Name | Documentation |
-|---|---|---|
-| UC01 | All Countries in the World | [UC01.md](UC01.md) |
-| UC02 | Countries by Continent | [UC02.md](UC02.md) |
-| UC03 | Countries by Region | [UC03.md](UC03.md) |
+| Use Case ID | Use Case Name | Documentation                         |
+|---|---|---------------------------------------|
+| UC01 | All Countries in the World | [UC01.md](04-country-reports/UC01.md) |
+| UC02 | Countries by Continent | [UC02.md](04-country-reports/UC02.md) |
+| UC03 | Countries by Region | [UC03.md](04-country-reports/UC03.md) |
 
 ### 3.2 Top-N Country Reports
 
-| Use Case ID | Use Case Name | Documentation |
-|---|---|---|
-| UC04 | Top N Populated Countries in the World | [UC04.md](UC04.md) |
-| UC05 | Top N Populated Countries in a Continent | [UC05.md](UC05.md) |
-| UC06 | Top N Populated Countries in a Region | [UC06.md](UC06.md) |
+| Use Case ID | Use Case Name | Documentation                       |
+|---|---|-------------------------------------|
+| UC04 | Top N Populated Countries in the World | [UC04.md](08-top-n-reports/UC04.md) |
+| UC05 | Top N Populated Countries in a Continent | [UC05.md](08-top-n-reports/UC05.md)                  |
+| UC06 | Top N Populated Countries in a Region | [UC06.md](08-top-n-reports/UC06.md)                  |
 
 ### 3.3 City Reports
 
-| Use Case ID | Use Case Name | Documentation |
-|---|---|---|
-| UC07 | All Cities in the World | [UC07.md](UC07.md) |
-| UC08 | Cities by Continent | [UC08.md](UC08.md) |
-| UC09 | Cities by Region | [UC09.md](UC09.md) |
-| UC10 | Cities by Country | [UC10.md](UC10.md) |
-| UC11 | Cities by District | [UC11.md](UC11.md) |
+| Use Case ID | Use Case Name | Documentation                      |
+|---|---|------------------------------------|
+| UC07 | All Cities in the World | [UC07.md](05-city-reports/UC07.md) |
+| UC08 | Cities by Continent | [UC08.md](05-city-reports/UC08.md)                 |
+| UC09 | Cities by Region | [UC09.md](05-city-reports/UC09.md)                 |
+| UC10 | Cities by Country | [UC10.md](05-city-reports/UC10.md)                 |
+| UC11 | Cities by District | [UC11.md](05-city-reports/UC11.md)                 |
 
 ### 3.4 Top-N City Reports
 
 | Use Case ID | Use Case Name | Documentation |
 |---|---|---|
-| UC12 | Top N Populated Cities in the World | [UC12.md](UC12.md) |
-| UC13 | Top N Populated Cities in a Continent | [UC13.md](UC13.md) |
-| UC14 | Top N Populated Cities in a Region | [UC14.md](UC14.md) |
-| UC15 | Top N Populated Cities in a Country | [UC15.md](UC15.md) |
-| UC16 | Top N Populated Cities in a District | [UC16.md](UC16.md) |
+| UC12 | Top N Populated Cities in the World | [UC12.md](08-top-n-reports/UC12.md) |
+| UC13 | Top N Populated Cities in a Continent | [UC13.md](08-top-n-reports/UC13.md) |
+| UC14 | Top N Populated Cities in a Region | [UC14.md](08-top-n-reports/UC14.md) |
+| UC15 | Top N Populated Cities in a Country | [UC15.md](08-top-n-reports/UC15.md) |
+| UC16 | Top N Populated Cities in a District | [UC16.md](08-top-n-reports/UC16.md) |
 
 ### 3.5 Capital City Reports
 
-| Use Case ID | Use Case Name | Documentation |
-|---|---|---|
-| UC17 | All Capital Cities in the World | [UC17.md](UC17.md) |
-| UC18 | Capital Cities by Continent | [UC18.md](UC18.md) |
-| UC19 | Capital Cities by Region | [UC19.md](UC19.md) |
+| Use Case ID | Use Case Name | Documentation                              |
+|---|---|--------------------------------------------|
+| UC17 | All Capital Cities in the World | [UC17.md](06-capital-city-reports/UC17.md) |
+| UC18 | Capital Cities by Continent | [UC18.md](06-capital-city-reports/UC18.md)                         |
+| UC19 | Capital Cities by Region | [UC19.md](06-capital-city-reports/UC19.md)                         |
 
 ### 3.6 Top-N Capital City Reports
 
 | Use Case ID | Use Case Name | Documentation |
 |---|---|---|
-| UC20 | Top N Populated Capital Cities in the World | [UC20.md](UC20.md) |
-| UC21 | Top N Populated Capital Cities in a Continent | [UC21.md](UC21.md) |
-| UC22 | Top N Populated Capital Cities in a Region | [UC22.md](UC22.md) |
+| UC20 | Top N Populated Capital Cities in the World | [UC20.md](08-top-n-reports/UC20.md) |
+| UC21 | Top N Populated Capital Cities in a Continent | [UC21.md](08-top-n-reports/UC21.md) |
+| UC22 | Top N Populated Capital Cities in a Region | [UC22.md](08-top-n-reports/UC22.md) |
 
 ### 3.7 Population Reports
 
-| Use Case ID | Use Case Name | Documentation |
-|---|---|---|
-| UC23 | Population Distribution by Continent | [UC23.md](UC23.md) |
-| UC24 | Population Distribution by Region | [UC24.md](UC24.md) |
-| UC25 | Population Distribution by Country | [UC25.md](UC25.md) |
-| UC26 | World Population | [UC26.md](UC26.md) |
-| UC27 | Population by Continent | [UC27.md](UC27.md) |
-| UC28 | Population by Region | [UC28.md](UC28.md) |
-| UC29 | Population by Country | [UC29.md](UC29.md) |
-| UC30 | Population by District | [UC30.md](UC30.md) |
-| UC31 | Population by City | [UC31.md](UC31.md) |
+| Use Case ID | Use Case Name | Documentation                            |
+|---|---|------------------------------------------|
+| UC23 | Population Distribution by Continent | [UC23.md](07-population-reports/UC23.md) |
+| UC24 | Population Distribution by Region | [UC24.md](07-population-reports/UC24.md)                       |
+| UC25 | Population Distribution by Country | [UC25.md](07-population-reports/UC25.md)                       |
+| UC26 | World Population | [UC26.md](07-population-reports/UC26.md)                       |
+| UC27 | Population by Continent | [UC27.md](07-population-reports/UC27.md)                       |
+| UC28 | Population by Region | [UC28.md](07-population-reports/UC28.md)                       |
+| UC29 | Population by Country | [UC29.md](07-population-reports/UC29.md)                       |
+| UC30 | Population by District | [UC30.md](07-population-reports/UC30.md)                       |
+| UC31 | Population by City | [UC31.md](07-population-reports/UC31.md)                       |
 
 ### 3.8 Language Reports
 
-| Use Case ID | Use Case Name | Documentation |
-|---|---|---|
-| UC32 | Language Speakers and Percentage of World Population | [UC32.md](UC32.md) |
+| Use Case ID | Use Case Name | Documentation                          |
+|---|---|----------------------------------------|
+| UC32 | Language Speakers and Percentage of World Population | [UC32.md](09-language-reports/UC32.md) |
 
 ---
 
