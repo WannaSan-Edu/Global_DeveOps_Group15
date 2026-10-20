@@ -53,7 +53,7 @@ The Use Case Diagram provides a visual overview of the Population Reporting Syst
 
 ![Population Reporting System Use Case Diagram](img/Use_Case.png)
 
-**Editable Use Case Diagram:** [Open the Draw.io Diagram](Population_Reporting_System_Use_Case.drawio)
+**Editable Use Case Diagram:** [Open the Draw.io Diagram](drawio/Use_Case.drawio)
 
 ### 2.1 Use Case Diagram Summary
 
