@@ -13,14 +13,15 @@ This Code of Conduct applies equally to every team member, regardless of role or
 
 ## 2. Team Members and Roles
 
-| Team Member | Role | Main Responsibilities |
-|---|---|---|
-| Yan Kyaw | Product Owner | Define and prioritise requirements, maintain the Product Backlog, clarify user stories, and ensure that the product meets stakeholder needs. |
-| Wanna San | Scrum Master | Facilitate Scrum activities, support team collaboration, identify and help remove blockers, and encourage compliance with agreed team processes. |
-| Thant Htoo Zin | Developer | Implement assigned functionality, test code, participate in code reviews, and maintain development standards. |
-| Hein Htut Zan | Developer | Implement assigned functionality, test code, participate in code reviews, and maintain development standards. |
-| Aung Phone Myint | Developer | Implement assigned functionality, test code, participate in code reviews, and maintain development standards. |
-| Kaung Htet | Developer | Implement assigned functionality, test code, participate in code reviews, and maintain development standards. |
+| Team Member | Matriculation Number | Role | Main Responsibilities |
+|---|---|---|---|
+| Yan Kyaw | [40870398] | Product Owner | Define and prioritise requirements, maintain the Product Backlog, clarify user stories, and ensure that the product meets stakeholder needs. |
+| Wanna San | [40870396] | Scrum Master | Facilitate Scrum activities, support team collaboration, identify and help remove blockers, and encourage compliance with agreed team processes. |
+| Thant Htoo Zin | [40870384] | Developer | Implement assigned functionality, test code, participate in code reviews, and maintain development standards. |
+| Hein Htut Zan | [40870393 ] | Developer | Implement assigned functionality, test code, participate in code reviews, and maintain development standards. |
+| Aung Phone Myint | [40870392] | Developer | Implement assigned functionality, test code, participate in code reviews, and maintain development standards. |
+| Kaung Htet | [40870394] | Developer | Implement assigned functionality, test code, participate in code reviews, and maintain development standards. |
+
 
 All team members share responsibility for project quality, communication, security, academic integrity, and successful delivery. The Product Owner and Scrum Master must also follow the same standards of respectful conduct and accountability.
 
