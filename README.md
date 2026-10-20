@@ -1,4 +1,5 @@
-# Global_DevOps_Group15
+
+# Global_DeveOps_Group15
 
 ## Build Status
 
@@ -20,33 +21,33 @@ Develop Build Status
 
 ## Group Contribution
 
-Group Name: Group 15
+**Group Name:** Group 15
 
-| Matric | Code Review 1 | Code Review 2 |
-|:---:|---:|---:|
-| 40870398 | 16.65 | |
-| 40870396 | 16.65 | |
-| 40870392 | 16.65 | |
-| 40870394 | 16.65 | |
-| 40870384 | 16.65 | |
-| 40870393 | 16.65 | |
-| Total | 100 | |
+| Matriculation Number | Code Review 1 | Code Review 2 |
+|:---:|--------------:|---:|
+| 40870398 |         16.65 |  |
+| 40870396 |         16.65 |  |
+| 40870392 |         16.65 |  |
+| 40870394 |         16.65 |  |
+| 40870384 |         16.65 |  |
+| 40870393 |         16.65 |  |
+| **Total** |       **100** |  |
 
-> Note: The current contribution scores total 99.90. Update the scores according to the team's agreed allocation if the total must equal exactly 100.
+**Note:** The Code Review 1 scores currently total 100. The team must agree on the final allocation and correct the scores if the required total is exactly 100. Complete Code Review 2 using the team's agreed contribution scores.
 
 ---
 
 ## 1. System Introduction
 
-Global_DeveOps_Group15 is a Java-based application designed to retrieve and display geographical and population information using a MySQL database. The application supports country and city information retrieval and population reporting for geographical areas covered by its implemented features.
+Global_DeveOps_Group15 is a Java-based application designed to retrieve and display geographical and population information using a MySQL database.
+
+The application supports reports about countries, cities, capital cities, population totals, population breakdowns, and official languages according to its implemented features.
 
 The system uses Java for its core functionality and MySQL for data storage. Apache Maven manages project dependencies and supports the build process. Docker and Docker Compose provide a consistent environment for running the application and database services.
 
-The project applies DevOps principles to improve collaboration, consistency, maintainability, and software quality throughout the software development lifecycle. Git and GitHub support version control and team collaboration, while GitHub Actions automates the build process and other checks configured in the repository.
+The project applies DevOps principles to support collaboration, consistency, maintainability, and software quality throughout the software development lifecycle. Git and GitHub support version control and team collaboration, while GitHub Actions automates the build and other checks configured in the repository.
 
-The team uses an organized development workflow involving feature branches, code integration, pull requests, and project documentation. These practices help team members manage changes, identify potential problems, and maintain a shared codebase.
-
-The overall objective is to develop a reliable, maintainable, and well-documented application while demonstrating the practical use of software development tools and DevOps practices in a collaborative team environment.
+The overall objective is to develop a maintainable, well-documented population reporting application while demonstrating the practical use of software development tools and DevOps practices in a collaborative team environment.
 
 ---
 
@@ -58,10 +59,10 @@ System requirements specify the hardware, software, and development tools needed
 
 | Component | Requirement |
 |---|---|
-| Processor | A modern multi-core processor capable of running the development tools and Docker. |
-| Memory (RAM) | 8 GB recommended; additional memory may be beneficial when running multiple containers. |
-| Storage | Sufficient free disk space for source code, dependencies, database files, and Docker images. |
-| Network | Internet access for repository operations, dependency downloads, and updates. |
+| Processor | A modern multi-core processor capable of running the development tools and Docker |
+| Memory (RAM) | 8 GB recommended; additional memory may be useful when running multiple containers |
+| Storage | Sufficient space for source code, dependencies, database files, and Docker images |
+| Network | Internet access for repository operations and dependency downloads |
 
 *Note: These are recommended development specifications, not verified minimum requirements.*
 
@@ -69,156 +70,249 @@ System requirements specify the hardware, software, and development tools needed
 
 | Software / Tool | Purpose |
 |---|---|
-| Operating System | Windows, macOS, or Linux with compatible development tools. |
-| Java Development Kit (JDK) | Provides the Java compiler and runtime required by the application. |
-| Apache Maven | Manages dependencies and builds the Java project. |
-| IntelliJ IDEA | Provides an environment for editing, running, and debugging Java code. |
-| Git | Tracks source-code changes and manages branches. |
-| GitHub | Hosts the repository and supports collaboration and pull requests. |
-| Docker | Builds and runs containerised application services. |
-| Docker Compose | Configures and runs the application and database services together. |
-| MySQL | Stores geographical and population data. |
-| GitHub Actions | Automates the build and other checks configured in the repository. |
+| Operating System | Windows, macOS, or Linux with compatible development tools |
+| Java Development Kit (JDK) | Compiles and runs the Java application |
+| Apache Maven | Manages dependencies and builds the project |
+| IntelliJ IDEA | Supports Java development and debugging |
+| Git | Tracks source-code changes and manages branches |
+| GitHub | Hosts the repository and supports collaboration |
+| Docker | Builds and runs containerised services |
+| Docker Compose | Configures and runs application and database services together |
+| MySQL | Stores geographical and population data |
+| GitHub Actions | Automates configured build and test steps |
+| JUnit | Supports automated testing where configured |
 
-**Version compatibility:** Use the JDK version specified in the Maven configuration and Dockerfile. Ensure that the local development environment and container build use compatible versions.
+**Version compatibility:** Use the JDK version specified in the Maven configuration and Dockerfile.
 
 ### 2.3 Project Configuration
 
 | File / Component | Purpose |
 |---|---|
-| `pom.xml` | Defines Maven dependencies and build configuration. |
-| `Dockerfile` | Defines how the application container image is built. |
-| `compose.yaml` or `docker-compose.yml` | Configures application and database services, environment variables, networking, and service dependencies. |
-| `.github/workflows/main.yml` | Defines GitHub Actions triggers and configured build or testing steps. |
-| Java source files | Implement application features and database operations. |
-| MySQL database | Stores the geographical data required by the application. |
+| `pom.xml` | Defines Maven dependencies and build configuration |
+| `Dockerfile` | Defines how the application image is built |
+| `compose.yaml` or `docker-compose.yml` | Configures application and database services |
+| `.github/workflows/main.yml` | Defines GitHub Actions triggers and workflow steps |
+| Java source files | Implement application features and database operations |
+| MySQL database | Stores the geographical data required by the application |
+| `README.md` | Documents the project, setup instructions, and requirement evidence |
+| `docs/screenshots/` | Stores application output screenshots for the requirements |
 
-Database credentials and other environment-specific settings should be managed securely. Real passwords and sensitive credentials must not be committed to the repository.
+Database credentials and other sensitive settings must be managed securely. Real passwords must not be committed to the repository.
 
 ---
 
 ## 3. User Requirements
 
-User requirements describe the functions expected from the application and the quality attributes needed to make the system useful, reliable, and maintainable.
+User requirements describe the functions expected from the application and the quality attributes needed to make the system useful and maintainable.
 
 ### 3.1 Functional Requirements
 
-| ID | Requirement | Expected Outcome |
-|---|---|---|
-| FR01 | View country information | Users can retrieve information about a selected country. |
-| FR02 | View country population | Users can view the selected country's name and total population when the required data is available. |
-| FR03 | View city information | Users can retrieve city information supported by the implemented features. |
-| FR04 | View district population reports | Users can retrieve district population information through the implemented report feature. |
-| FR05 | Retrieve database information | The application can query MySQL to obtain the required records. |
-| FR06 | Handle missing data | The application displays a clear message when requested information is unavailable. |
-| FR07 | Handle errors | The application handles expected database connection failures and other errors appropriately. |
-
-*Note: Ensure that every requirement matches the team's actual implementation and agreed coursework scope.*
+The application is expected to support the 32 user stories defined in the project backlog. These cover country reports, city reports, capital city reports, population breakdowns, population totals, and official language reports.
 
 ### 3.2 Non-Functional Requirements
 
 | ID | Requirement | Expected Outcome |
 |---|---|---|
-| NFR01 | Reliability | The application handles expected failures without terminating unexpectedly. |
-| NFR02 | Maintainability | Source code is readable, organised, and structured to support future changes. |
-| NFR03 | Usability | Results and error messages are clear and understandable. |
-| NFR04 | Compatibility | The application runs with the Java version and supporting tools specified by the project configuration. |
-| NFR05 | Security | Database credentials are managed securely, with appropriate database permissions. |
-| NFR06 | Reproducibility | Docker Compose provides a consistent method for configuring and starting the application and database services. |
-| NFR07 | Testability | Application functionality can be verified through appropriate tests. |
+| NFR01 | Reliability | The application handles expected failures appropriately |
+| NFR02 | Maintainability | Source code is organised and readable |
+| NFR03 | Usability | Reports and error messages are understandable |
+| NFR04 | Compatibility | The application uses compatible Java and supporting tool versions |
+| NFR05 | Security | Database credentials are managed securely |
+| NFR06 | Reproducibility | Docker Compose supports a repeatable environment where correctly configured |
+| NFR07 | Testability | Application functions can be verified through appropriate tests |
+
+*Note: These are quality objectives. Verify them against the actual implementation before claiming they have been met.*
 
 ---
 
 ## 4. DevOps and Team Collaboration Requirements
 
-The project uses DevOps practices to support collaborative development, controlled code integration, build automation, and consistent application execution.
-
 ### 4.1 Version Control and Collaboration
 
-- Team members use Git to track changes to source code and project documentation.
-- Feature branches support individual feature development without directly modifying the shared development branch.
-- Pull requests support code review and controlled integration of changes.
-- Merge conflicts are resolved before the affected changes are integrated.
-- Commit messages and pull request descriptions clearly explain the changes made.
+- Git tracks changes to source code and project documentation.
+- Feature branches support separate development tasks.
+- Pull requests support code review and controlled integration.
+- Merge conflicts are resolved before changes are integrated.
+- Commit messages explain the changes made.
 
 ### 4.2 Build Automation and Continuous Integration
 
-- Maven manages project dependencies and builds the Java application.
-- GitHub Actions executes the steps defined in the repository workflow when its configured triggers occur.
-- Automated tests should be included in the workflow where test cases are available and configured.
-- Build or test failures should be investigated and resolved before changes are considered ready for integration.
+- Maven manages dependencies and builds the application.
+- GitHub Actions executes the workflow steps defined in the repository.
+- Automated tests run when included and configured in the workflow.
+- Build and test failures are investigated before changes are considered ready for integration.
 
 ### 4.3 Containerisation and Database Management
 
-- Docker provides a containerized environment for the application.
-- Docker Compose coordinates the application and MySQL database services.
-- Service configuration uses the correct internal network addresses and ports.
-- The application should wait for the database to become ready before attempting database operations.
-- Database configuration should be documented so that team members can reproduce the development environment.
+- Docker provides a containerised application environment.
+- Docker Compose coordinates application and MySQL services.
+- Database addresses and ports must match the project configuration.
+- The application must handle database startup and connection failures appropriately.
+- Setup instructions support a repeatable development environment.
 
 ### 4.4 Documentation and Project Management
 
-- The README documents the project purpose, requirements, configuration, and setup process.
-- GitHub Projects tracks tasks, responsibilities, and progress.
-- Team members maintain clear records of their contributions and completed work.
-- Team members follow the agreed coding standards and Code of Conduct.
+- The README documents the project, setup, and requirement evidence.
+- GitHub Projects tracks tasks and development progress.
+- Team members record their contributions accurately.
+- The team follows its agreed coding standards and Code of Conduct.
 - Documentation is updated when significant implementation or configuration changes occur.
 
 ---
 
-## 5. Expected Outcomes
+## 5. Requirements Implementation Status
+
+**Verified requirements implemented:** [Enter verified number] out of 32
+
+**Implementation percentage:** [Enter calculated percentage]%
+
+Calculate the percentage using:
+
+`(Verified requirements / 32) × 100`
+
+For example, if 20 requirements have been implemented and verified:
+
+`(20 / 32) × 100 = 62.5%`
+
+Replace the placeholders with the actual verified results before submission.
+
+### 5.1 Requirement Evidence Table
+
+Save the screenshots in `Report_Result/img/` and use the matching filenames below. Replace each `[Yes/No]` with the actual result after testing.
+
+| ID | Name | Met | Screenshot                           |
+|---|---|---|--------------------------------------|
+| US01 | All countries worldwide, ordered by population from largest to smallest | [Yes] | ![US01](Report_Result/img/US_01.jpg) |
+| US02 | All countries in a selected continent, ordered by population | [Yes] | ![US02](Report_Result/img/US_02.jpg) |
+| US03 | All countries in a selected region, ordered by population | [Yes] | ![US03](Report_Result/img/US_03.jpg) |
+| US04 | Top N most populated countries worldwide | [No] |                                      |
+| US05 | Top N most populated countries in a selected continent | [No] |                                      |
+| US06 | Top N most populated countries in a selected region | [No] |                                      |
+| US07 | All cities worldwide, ordered by population | [Yes] | ![US07](Report_Result/img/US_07.jpg) |
+| US08 | All cities in a selected continent, ordered by population | [Yes] | ![US08](Report_Result/img/US_08.jpg) |
+| US09 | All cities in a selected region, ordered by population | [Yes] | ![US09](Report_Result/img/US_09.jpg) |
+| US10 | All cities in a selected country, ordered by population | [No] |                                      |
+| US11 | All cities in a selected district, ordered by population | [No] |                                      |
+| US12 | Top N most populated cities worldwide | [No] |                                      |
+| US13 | Top N most populated cities in a selected continent | [Yes] | ![US13](Report_Result/img/US_13.jpg) |
+| US14 | Top N most populated cities in a selected region | [Yes] | ![US14](Report_Result/img/US_14.jpg) |
+| US15 | Top N most populated cities in a selected country | [Yes] | ![US15](Report_Result/img/US_15.jpg) |
+| US16 | Top N most populated cities in a selected district | [No] |                                      |
+| US17 | All capital cities worldwide, ordered by population | [Yes] | ![US17](Report_Result/img/US_17.jpg) |
+| US18 | All capital cities in a selected continent, ordered by population | [Yes] | ![US18](Report_Result/img/US_18.jpg) |
+| US19 | All capital cities in a selected region, ordered by population | [Yes] | ![US19](Report_Result/img/US_19.jpg) |
+| US20 | Top N most populated capital cities worldwide | [No] |                                      |
+| US21 | Top N most populated capital cities in a selected continent | [No] |                                      |
+| US22 | Top N most populated capital cities in a selected region | [No] |                                      |
+| US23 | Population breakdown by continent, including city and non-city populations and percentages | [No] |                                      |
+| US24 | Population breakdown by region, including city and non-city populations and percentages | [No] |                                      |
+| US25 | Population breakdown by country, including city and non-city populations and percentages | [Yes] | ![US25](Report_Result/img/US_25.jpg) |
+| US26 | Total world population | [Yes] | ![US26](Report_Result/img/US_26.jpg) |
+| US27 | Total population of a selected continent | [No] |                                      |
+| US28 | Total population of a selected region | [No] |                                      |
+| US29 | Total population of a selected country | [Yes] | ![US29](Report_Result/img/US_29.jpg) |
+| US30 | Total population of a selected district | [Yes] | ![US30](Report_Result/img/US_30.jpg) |
+| US31 | Total population of a selected city | [No] |    |
+| US32 | Population speaking Chinese, English, Hindi, Spanish, and Arabic, including percentages of the world population | [No] |    |
+
+**Evidence requirements:**
+
+1. Capture screenshots from the running application showing actual output.
+2. Save each screenshot using the matching filename in `Report_Result/img/`.
+3. Commit the screenshots to the repository.
+4. Confirm that every screenshot link opens correctly on GitHub.
+5. Mark a requirement Yes only when the relevant functionality has been implemented and verified.
+6. Mark a requirement No if it has not been implemented or cannot be verified.
+7. Ensure the summary count and percentage match the Yes entries in the table.
+8. Check the requirement titles against the original coursework specification and backlog.
+
+---
+
+## 6. Expected Outcomes
 
 The expected outcomes of the project are:
 
-1. A Java application that retrieves and displays geographical and population information supported by its implemented features.
-2. MySQL database integration that enables the application to access the required data.
-3. A repeatable application environment supported by Docker and Docker Compose.
-4. A collaborative development workflow supported by Git and GitHub.
-5. An automated build process using GitHub Actions, together with testing and validation steps where configured.
-6. Clear project documentation that supports setup, maintenance, collaboration, and future development.
+1. A Java application that generates the supported geographical and population reports.
+2. MySQL database integration for retrieving the required information.
+3. A repeatable environment using Docker and Docker Compose where configured.
+4. A collaborative development workflow using Git and GitHub.
+5. An automated build and testing process where configured.
+6. Documentation and screenshot evidence for the 32 requirements.
+7. Accurate reporting of implementation status and team contributions.
 
-The project demonstrates the practical application of software development tools and DevOps practices within a collaborative coursework environment.
-
----
-
-## 6. Project Setup and Execution
-
-### Prerequisites
-
-Before running the application, ensure that the required Java development tools, Maven, Docker, and Docker Compose are installed and available.
-
-### Run the Application with Docker Compose
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/WannaSan-Edu/Global_DeveOps_Group15.git
-   ```
-
-2. Navigate to the project directory:
-
-   ```bash
-   cd Global_DeveOps_Group15
-   ```
-
-3. Build and start the application and database services:
-
-   ```bash
-   docker compose up --build
-   ```
-
-4. Review the application logs to check whether the database connection is successful and the application starts correctly.
-
-5. To stop the services, run:
-
-   ```bash
-   docker compose down
-   ```
-
-**Important:** These commands assume that the repository contains a valid Docker Compose configuration and the required database initialization and environment settings. Follow any additional database setup instructions provided by the project.
+These are project objectives. Final claims must reflect functionality that has actually been implemented and verified.
 
 ---
 
-## 7. Licence
+## 7. Project Setup and Execution
 
-Refer to the repository's [LICENSE](https://github.com/WannaSan-Edu/Global_DeveOps_Group15/blob/main/LICENSE) file for the applicable license terms.
+### 7.1 Prerequisites
+
+Before running the application, ensure that the required Java Development Kit, Maven, Docker, and Docker Compose are installed.
+
+### 7.2 Clone the Repository
+
+```bash
+git clone https://github.com/WannaSan-Edu/Global_DeveOps_Group15.git
+cd Global_DeveOps_Group15
+```
+
+### 7.3 Build the Application
+
+```bash
+mvn clean package
+```
+
+### 7.4 Run Automated Tests
+
+```bash
+mvn test
+```
+
+### 7.5 Run with Docker Compose
+
+```bash
+docker compose up --build
+```
+
+Review the application logs to confirm that the application starts and connects to the database successfully.
+
+To stop the services:
+
+```bash
+docker compose down
+```
+
+**Important:** These commands assume that the repository contains the required Maven, Docker, and Docker Compose configuration. Test the commands before submitting the README.
+
+---
+
+## 8. Licence
+
+Refer to the repository's [LICENSE](https://github.com/WannaSan-Edu/Global_DeveOps_Group15/blob/main/LICENSE) file for the applicable licence terms.
+
+---
+
+## 9. Project Links
+
+- [GitHub Repository](https://github.com/WannaSan-Edu/Global_DeveOps_Group15)
+- [GitHub Actions](https://github.com/WannaSan-Edu/Global_DeveOps_Group15/actions)
+- [GitHub Releases](https://github.com/WannaSan-Edu/Global_DeveOps_Group15/releases)
+- [GitHub Issues](https://github.com/WannaSan-Edu/Global_DeveOps_Group15/issues)
+
+---
+
+## 10. Final Submission Checklist
+
+- [ ] Submit the GitHub repository clone URL to Moodle.
+- [ ] Include all five required badges.
+- [ ] Verify the master and develop build badges.
+- [ ] Configure the code coverage badge to report real test coverage.
+- [ ] Confirm that the GitHub release and licence are available.
+- [ ] Add status and screenshot evidence for all 32 requirements.
+- [ ] Check the implementation count and percentage.
+- [ ] Complete the contribution spreadsheet using the team's agreed scores.
+- [ ] Commit the final README, application code, and screenshots to `master`.
+- [ ] Verify that `master` contains the intended final submission.
+
+**Final reminder:** The submitted repository must accurately represent the work completed by the group. Do not report unverified functionality, fabricated screenshots, or unagreed contribution scores.
