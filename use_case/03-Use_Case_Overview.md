@@ -51,9 +51,9 @@ These categories represent the main reporting functions illustrated in the Use C
 
 The Use Case Diagram provides a visual overview of the Population Reporting System. It illustrates the interactions between the Organisation User, the main reporting functions, and the external MySQL Database.
 
-![Population Reporting System Use Case Diagram](img/Use_Case.png)
+![Population Reporting System Use Case Diagram](01-img/Use_Case.png)
 
-**Editable Use Case Diagram:** [Open the Draw.io Diagram](drawio/Use_Case.drawio)
+**Editable Use Case Diagram:** [Open the Draw.io Diagram](02-drawio/Use_Case.drawio)
 
 ### 2.1 Use Case Diagram Summary
 
