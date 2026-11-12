@@ -131,6 +131,9 @@ public class App {
                 CapitalsCitiesInAregion.printReport(capitals, region);
             });
 
+            // US22: Top N most populated capital cities in a region.
+            runReport("US22 - Top N Capital Cities in a Region",
+                    () -> ViewTopNCapitalCitiesInARegion_US22.generateReport(con, "Caribbean", 10));
             // US25: Total, city, and non-city population for each country.
             runReport("US25 - Population by Country", () -> {
                 ArrayList<Population> populations = ViewPopulationByCountry.getPopulationByCountry(con);
