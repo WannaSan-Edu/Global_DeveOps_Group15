@@ -131,6 +131,11 @@ public class App {
                 CapitalsCitiesInAregion.printReport(capitals, region);
             });
 
+            // Change "Asia" and 10 to the continent and N required.
+            runReport("US21 - Top N Capital Cities in a Continent",
+                    () -> ViewTopNCapitalCitiesInAContinent_US21
+                            .generateReport(con, "Asia", 10));
+
             // US25: Total, city, and non-city population for each country.
             runReport("US25 - Population by Country", () -> {
                 ArrayList<Population> populations = ViewPopulationByCountry.getPopulationByCountry(con);
