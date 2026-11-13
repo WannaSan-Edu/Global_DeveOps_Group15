@@ -141,6 +141,13 @@ public class App {
             runReport("US26 - Total World Population",
                     () -> TotalWorldPopulation.printReport(con));
 
+            // US27: View population of a selected continent.
+            runReport("US27 - Population of a Continent", () -> {
+                String continent = "Asia";
+                ViewPopulationOfAContinent_US27.getPopulationOfContinent(
+                        con, continent);
+            });
+
             // Country population report; blank argument displays all countries.
             runReport("Country Population Report", () -> {
                 CountryPopulationReport report = new CountryPopulationReport(con);
