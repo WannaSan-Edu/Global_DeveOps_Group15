@@ -80,6 +80,17 @@ public class App {
             // US03 - View all countries in each region, ordered by population.
             runReport("US03 - View All Countries in a Region",
                     () -> printCountriesByRegion(con));
+           // US04: View top N most populated countries in the world.
+            runReport("US04 - Top N Most Populated Countries in the World",
+                    () -> US04_view_top_n_countries_in_the_world.printReport(con, 10));
+            
+            // US05: View top N most populated countries in a continent.
+            runReport("US05 - Top N Most Populated Countries in a Continent",
+                    () -> US05_view_top_n_countries_in_a_continent.printReport(con, "Asia", 10));
+
+            // US06: View top N most populated countries in a region.
+            runReport("US06 - Top N Most Populated Countries in a Region",
+                    () -> US06_view_top_n_countries_in_a_region.printReport(con, "Southeast Asia", 10));
 
             // US07: View all cities in the world.
             runReport("US07 - View All Cities in the World",
@@ -96,11 +107,19 @@ public class App {
                 ViewAllCitiesinaRegion us09 = new ViewAllCitiesinaRegion(con);
                 us09.getCitiesInRegion("Southeast Asia");
             });
-        // US11 - View all cities in a district
+          
+            // US10 - View all cities in a country
+            runReport("US10 - View All Cities in a Country", () -> {
+                ViewCitiesInACountry_US10 us10 = new ViewCitiesInACountry_US10(con);
+                us10.getCitiesInCountry("Myanmar");
+            });
+          
+            // US11 - View all cities in a district
             runReport("US11 - View All Cities in a District", () -> {
                 ViewAllCitiesInaDistrict_US11 us11= new ViewAllCitiesInaDistrict_US11(con);
                 us11.getCitiesInDistrict("Mandalay");
             });
+
             // US13: Top Populated Cities in a Continent
             runReport("US13 - Top Populated Cities in a Continent",
                     () -> TopCitiesInContinent.generateReport(con, "Asia", 10));
@@ -355,4 +374,5 @@ public class App {
             System.err.println("Report failed: " + name + " - " + e.getMessage());
         }
     }
+
 }
