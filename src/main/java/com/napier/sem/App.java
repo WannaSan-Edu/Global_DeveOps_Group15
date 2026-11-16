@@ -108,7 +108,10 @@ public class App {
             // US15: Top Populated Cities in a Country
             runReport("US15 - Top Populated Cities in a Country",
                     () -> TopCitiesInCountry.generateReport(con, "Japan", 10));
+            // US16 - Top N Populated Cities in a District
 
+            runReport("US16 - Top N Populated Cities in a District",
+                    () -> TopNPopulatedCitiesInDistrict_US016.generateReport(con, "California", 10));
             // US17: View all capital cities in the world.
             runReport("US17 - All Capital Cities in the World", () -> {
                 ArrayList<CapitalCity> capitals = AllCapitalsCitiesInTheWorld_US17.getAll(con);
