@@ -6,11 +6,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class ViewAllCitiesInaDistrict {
+public class ViewAllCitiesInaDistrict_US11 {
 
     private final Connection con;
 
-    public ViewAllCitiesInaDistrict(Connection con) {
+    public ViewAllCitiesInaDistrict_US11(Connection con) {
         this.con = con;
     }
 
