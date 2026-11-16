@@ -80,8 +80,10 @@ public class App {
             // US03 - View all countries in each region, ordered by population.
             runReport("US03 - View All Countries in a Region",
                     () -> printCountriesByRegion(con));
-
-
+           // US04: View top N most populated countries in the world.
+            runReport("US04 - Top N Most Populated Countries in the World",
+                    () -> US04_view_top_n_countries_in_the_world.printReport(con, 10));
+            
             // US05: View top N most populated countries in a continent.
             runReport("US05 - Top N Most Populated Countries in a Continent",
                     () -> US05_view_top_n_countries_in_a_continent.printReport(con, "Asia", 10));
@@ -356,4 +358,5 @@ public class App {
             System.err.println("Report failed: " + name + " - " + e.getMessage());
         }
     }
+
 }
