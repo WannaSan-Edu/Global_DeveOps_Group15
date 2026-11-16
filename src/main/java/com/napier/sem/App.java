@@ -80,6 +80,17 @@ public class App {
             // US03 - View all countries in each region, ordered by population.
             runReport("US03 - View All Countries in a Region",
                     () -> printCountriesByRegion(con));
+           // US04: View top N most populated countries in the world.
+            runReport("US04 - Top N Most Populated Countries in the World",
+                    () -> US04_view_top_n_countries_in_the_world.printReport(con, 10));
+            
+            // US05: View top N most populated countries in a continent.
+            runReport("US05 - Top N Most Populated Countries in a Continent",
+                    () -> US05_view_top_n_countries_in_a_continent.printReport(con, "Asia", 10));
+
+            // US06: View top N most populated countries in a region.
+            runReport("US06 - Top N Most Populated Countries in a Region",
+                    () -> US06_view_top_n_countries_in_a_region.printReport(con, "Southeast Asia", 10));
 
             // US07: View all cities in the world.
             runReport("US07 - View All Cities in the World",
@@ -97,6 +108,24 @@ public class App {
                 us09.getCitiesInRegion("Southeast Asia");
             });
 
+            // US10 - View all cities in a country
+            runReport("US10 - View All Cities in a Country", () -> {
+                ViewCitiesInACountry_US10 us10 = new ViewCitiesInACountry_US10(con);
+                us10.getCitiesInCountry("Myanmar");
+            });
+          
+            // US11 - View all cities in a district
+            runReport("US11 - View All Cities in a District", () -> {
+                ViewAllCitiesInaDistrict_US11 us11= new ViewAllCitiesInaDistrict_US11(con);
+                us11.getCitiesInDistrict("Mandalay");
+            });
+          
+             // US12 - View top N cities in the world
+            runReport("US12 - View Top N Cities in the World", () -> {
+                ViewTopCitiesInTheWorld_US12 us12 = new ViewTopCitiesInTheWorld_US12(con);
+                us12.getTopNCitiesInWorld(10);
+            });
+
             // US13: Top Populated Cities in a Continent
             runReport("US13 - Top Populated Cities in a Continent",
                     () -> TopCitiesInContinent.generateReport(con, "Asia", 10));
@@ -108,7 +137,10 @@ public class App {
             // US15: Top Populated Cities in a Country
             runReport("US15 - Top Populated Cities in a Country",
                     () -> TopCitiesInCountry.generateReport(con, "Japan", 10));
-
+          
+            // US16 - Top N Populated Cities in a District
+            runReport("US16 - Top N Populated Cities in a District",
+                    () -> TopNPopulatedCitiesInDistrict_US016.generateReport(con, "California", 10));
             // US17: View all capital cities in the world.
             runReport("US17 - All Capital Cities in the World", () -> {
                 ArrayList<CapitalCity> capitals = AllCapitalsCitiesInTheWorld_US17.getAll(con);
@@ -130,10 +162,25 @@ public class App {
                         .getCapitalCitiesByRegion(con, region);
                 CapitalsCitiesInAregion.printReport(capitals, region);
             });
+          
+            // US20: Top N capital cities in the world.
+            runReport("US20 - Top N Capital Cities in the World", () -> {
+                int n = 10;
 
+            // US21: Top N capital cities in a selected continent.
+            // Change "Asia" and 10 to the continent and N required.
+            runReport("US21 - Top N Capital Cities in a Continent",
+                    () -> ViewTopNCapitalCitiesInAContinent_US21
+                            .generateReport(con, "Asia", 10));
+                ArrayList<CapitalCity> capitals =
+                        ViewTopNCapitalCitiesInTheWorld_US20.getTopN(con, n);
+                ViewTopNCapitalCitiesInTheWorld_US20.printReport(capitals, n);
+            });
+           
             // US22: Top N most populated capital cities in a region.
             runReport("US22 - Top N Capital Cities in a Region",
                     () -> ViewTopNCapitalCitiesInARegion_US22.generateReport(con, "Caribbean", 10));
+          
             // US25: Total, city, and non-city population for each country.
             runReport("US25 - Population by Country", () -> {
                 ArrayList<Population> populations = ViewPopulationByCountry.getPopulationByCountry(con);
@@ -354,4 +401,5 @@ public class App {
             System.err.println("Report failed: " + name + " - " + e.getMessage());
         }
     }
+
 }
