@@ -82,7 +82,6 @@ public class App {
                     () -> printCountriesByRegion(con));
 
             // US04: View top N most populated countries in the world.
-            // Fixed N = 10 for automated GitHub Actions execution.
             runReport("US04 - Top N Most Populated Countries in the World",
                     () -> US04_view_top_n_countries_in_the_world.printReport(con, 10));
 
