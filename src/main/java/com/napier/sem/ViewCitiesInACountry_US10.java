@@ -6,11 +6,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class ViewCitiesInACountry {
+public class ViewCitiesInACountry_US10 {
 
     private Connection con;
 
-    public ViewCitiesInACountry(Connection con) {
+    public ViewCitiesInACountry_US10(Connection con) {
         this.con = con;
     }
 
