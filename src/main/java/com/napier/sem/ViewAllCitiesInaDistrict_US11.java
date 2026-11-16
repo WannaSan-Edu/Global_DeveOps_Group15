@@ -18,12 +18,11 @@ public class ViewAllCitiesInaDistrict_US11 {
 
         String sql = "SELECT city.Name AS CityName, " +
                 "country.Name AS CountryName, " +
-                "city.District AS DistrictName, " +
-                "city.Population AS CityPopulation " +
+                "city.District, city.Population " +
                 "FROM city " +
                 "JOIN country ON city.CountryCode = country.Code " +
                 "WHERE city.District = ? " +
-                "ORDER BY city.Population DESC, city.Name ASC";
+                "ORDER BY city.Population DESC";
 
         try (PreparedStatement stmt = con.prepareStatement(sql)) {
 
@@ -31,38 +30,34 @@ public class ViewAllCitiesInaDistrict_US11 {
 
             try (ResultSet rs = stmt.executeQuery()) {
 
-                String line = "-".repeat(118);
-
                 System.out.println();
-                System.out.println("US11 - View all cities in a district: " + districtName);
-                System.out.println(line);
+                System.out.println("US11 - All Cities in District: " + districtName);
+                System.out.println("-".repeat(105));
 
-                System.out.printf("| %-30s | %-30s | %-30s | %15s |%n",
+                System.out.printf("%-30s %-25s %-30s %15s%n",
                         "City Name", "Country", "District", "Population");
 
-                System.out.println(line);
+                System.out.println("-".repeat(105));
 
-                int count = 0;
+                boolean found = false;
 
                 while (rs.next()) {
-                    System.out.printf("| %-30.30s | %-30.30s | %-30.30s | %,15d |%n",
+                    found = true;
+
+                    System.out.printf("%-30.30s %-25.25s %-30.30s %,15d%n",
                             rs.getString("CityName"),
                             rs.getString("CountryName"),
-                            rs.getString("DistrictName"),
-                            rs.getLong("CityPopulation"));
-                    count++;
+                            rs.getString("District"),
+                            rs.getLong("Population"));
                 }
 
-                if (count == 0) {
-                    System.out.println("No cities found for district: " + districtName);
+                if (!found) {
+                    System.out.println("No cities found.");
                 }
-
-                System.out.println(line);
-                System.out.println("Cities displayed: " + count);
             }
 
         } catch (SQLException e) {
-            System.out.println("Error running US11 report: " + e.getMessage());
+            System.out.println("US11 Error: " + e.getMessage());
         }
     }
 }

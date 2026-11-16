@@ -96,7 +96,11 @@ public class App {
                 ViewAllCitiesinaRegion us09 = new ViewAllCitiesinaRegion(con);
                 us09.getCitiesInRegion("Southeast Asia");
             });
-
+        // US11 - View all cities in a district
+            runReport("US11 - View All Cities in a District", () -> {
+                ViewAllCitiesInaDistrict_US11 us11= new ViewAllCitiesInaDistrict_US11(con);
+                us11.getCitiesInDistrict("Mandalay");
+            });
             // US13: Top Populated Cities in a Continent
             runReport("US13 - Top Populated Cities in a Continent",
                     () -> TopCitiesInContinent.generateReport(con, "Asia", 10));
