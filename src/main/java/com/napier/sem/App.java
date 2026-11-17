@@ -131,6 +131,10 @@ public class App {
                 CapitalsCitiesInAregion.printReport(capitals, region);
             });
 
+            // US24: Population by Region
+            runReport("US24 - Population by Region",
+                    () -> PopulationByRegion_US024.generateReport(con));
+
             // US25: Total, city, and non-city population for each country.
             runReport("US25 - Population by Country", () -> {
                 ArrayList<Population> populations = ViewPopulationByCountry.getPopulationByCountry(con);
