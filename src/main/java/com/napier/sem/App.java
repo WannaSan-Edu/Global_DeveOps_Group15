@@ -70,6 +70,27 @@ public class App {
             String countryArg = args.length > 0 ? args[0].trim() : "";
             String districtArg = args.length > 1 ? args[1].trim() : "";
 
+            // US32: Read the report selection from the fifth argument.
+            String reportSelection =
+                    args.length > 4 ? args[4].trim() : "";
+
+            // US32: Run the population by language report independently.
+            if ("US32".equalsIgnoreCase(reportSelection)) {
+
+                runReport("US32 - Population by Language", () -> {
+
+                    // Create the US32 report using the shared database connection.
+                    US32_PopulationByLanguageReport us32 =
+                            new US32_PopulationByLanguageReport(con);
+
+                    // Retrieve and display population data for the five languages.
+                    us32.run();
+                });
+
+                // Stop other reports so that US32 can be tested independently.
+                return;
+            }
+
             // US01: All countries in the world ordered by population.
             runReport("US01 - All Countries in the World by Population",
                     () -> US01_view_all_countries_in_the_world.printReport(con));
