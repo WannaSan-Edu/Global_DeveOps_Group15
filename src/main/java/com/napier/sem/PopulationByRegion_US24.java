@@ -6,7 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class PopulationByRegion_US024 {
+public class PopulationByRegion_US24 {
 
     /**
      * Displays population statistics for each region.

@@ -133,7 +133,7 @@ public class App {
 
             // US24: Population by Region
             runReport("US24 - Population by Region",
-                    () -> PopulationByRegion_US024.generateReport(con));
+                    () -> PopulationByRegion_US24.generateReport(con));
 
             // US25: Total, city, and non-city population for each country.
             runReport("US25 - Population by Country", () -> {
