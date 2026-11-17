@@ -70,6 +70,31 @@ public class App {
             String countryArg = args.length > 0 ? args[0].trim() : "";
             String districtArg = args.length > 1 ? args[1].trim() : "";
 
+            // US31: Get the selected city name from program arguments.
+            String cityArg = args.length > 2 ? args[2].trim() : "";
+
+            // US31: Get the optional country name to identify the city.
+            String cityCountryArg = args.length > 3 ? args[3].trim() : "";
+
+            // US31: Run the selected city population report.
+            if (!cityArg.isBlank()) {
+
+                runReport("US31 - Total Population of a Selected City", () -> {
+
+                    // Create the city population report using the shared connection.
+                    US31_CityPopulationReport us31 =
+                            new US31_CityPopulationReport(con);
+
+                    // Display the selected city's population.
+                    us31.run(cityArg, cityCountryArg);
+                });
+
+                // Stop here so that only US31 runs during testing.
+                return;
+            }
+
+
+
             // US01: All countries in the world ordered by population.
             runReport("US01 - All Countries in the World by Population",
                     () -> US01_view_all_countries_in_the_world.printReport(con));
