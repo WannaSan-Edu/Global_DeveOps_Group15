@@ -5,375 +5,255 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Locale;
 
 /**
- * Application entry point for the report classes present in this project.
+ * US31 - Total Population of a Selected City.
  *
- * One database connection is shared by every report and is closed only after
- * all reports have finished. Report methods should close their own Statements
- * and ResultSets, but must not close the shared Connection.
+ * This application connects to the MySQL database
+ * and executes only the US31 city population report.
  */
 public class App {
 
+    // Maximum number of database connection attempts.
     private static final int MAX_ATTEMPTS = 100;
+
+    // Delay between connection attempts (3 seconds).
     private static final long RETRY_DELAY_MS = 3000;
 
     public static void main(String[] args) {
+
+        // Read the selected city name from program arguments.
+        String cityName = args.length > 0 ? args[0].trim() : "";
+
+        // Read the optional country name.
+        // This helps distinguish cities with the same name.
+        String countryName = args.length > 1 ? args[1].trim() : "";
+
+        // Validate the selected city name.
+        if (cityName.isBlank()) {
+
+            System.err.println(
+                    "Please provide a city name."
+            );
+
+            System.err.println(
+                    "Example: Kabul Afghanistan"
+            );
+
+            return;
+        }
+
+        // Load the MySQL JDBC driver.
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
+
         } catch (ClassNotFoundException e) {
-            System.err.println("ERROR: MySQL JDBC driver was not found. Check pom.xml.");
+
+            System.err.println(
+                    "Could not load MySQL JDBC driver."
+            );
+
             return;
         }
 
-        // Docker Compose: DB_HOST=db:3306
-        // Running on the host machine: default localhost:33060
-        String dbHost = System.getenv().getOrDefault("DB_HOST", "localhost:33060");
-        String dbUrl = System.getenv("DB_URL");
+        // Use IPv4 localhost and Docker's exposed MySQL port.
+        String host = System.getenv().getOrDefault(
+                "DB_HOST",
+                "127.0.0.1:33060"
+        );
 
-        if (dbUrl == null || dbUrl.isBlank()) {
-            dbUrl = "jdbc:mysql://" + dbHost + "/world"
-                    + "?useSSL=false"
-                    + "&allowPublicKeyRetrieval=true"
-                    + "&connectTimeout=5000"
-                    + "&socketTimeout=30000";
-        }
+        // Build the MySQL database connection URL.
+        String url = "jdbc:mysql://" + host
+                + "/world"
+                + "?useSSL=false"
+                + "&allowPublicKeyRetrieval=true"
+                + "&connectTimeout=5000"
+                + "&socketTimeout=30000";
 
-        String dbUser = System.getenv().getOrDefault("DB_USER", "root");
-        String dbPassword = System.getenv().getOrDefault("DB_PASSWORD", "example");
+        // Database login credentials.
+        String username = System.getenv().getOrDefault(
+                "DB_USER", "root"
+        );
 
-        System.out.println("Starting Global DevOps reports...");
-        System.out.println("Database URL: " + dbUrl);
+        String password = System.getenv().getOrDefault(
+                "DB_PASSWORD", "example"
+        );
 
-        Connection connection = connectToDatabase(dbUrl, dbUser, dbPassword);
-        if (connection == null) {
-            System.err.println("ERROR: Could not connect to MySQL. Check the database "
-                    + "service, host/port, credentials, and world database.");
-            return;
-        }
+        Connection con = null;
 
-        // The shared connection stays open for the entire report sequence.
-        try (Connection con = connection) {
-            System.out.println("Database connection established.");
+        // Retry the database connection if necessary.
+        for (int i = 0; i < MAX_ATTEMPTS; i++) {
 
-            if (!isDatabaseReady(con)) {
-                System.err.println("ERROR: Required world database tables are unavailable.");
-                return;
-            }
-
-            // Optional arguments:
-            // args[0] = country name for the country population report
-            // args[1] = district name for the district population report
-            // If omitted, those reports display all available records.
-            String countryArg = args.length > 0 ? args[0].trim() : "";
-            String districtArg = args.length > 1 ? args[1].trim() : "";
-
-            // US31: Get the selected city name from program arguments.
-            String cityArg = args.length > 2 ? args[2].trim() : "";
-
-            // US31: Get the optional country name to identify the city.
-            String cityCountryArg = args.length > 3 ? args[3].trim() : "";
-
-            // US31: Run the selected city population report.
-            if (!cityArg.isBlank()) {
-
-                runReport("US31 - Total Population of a Selected City", () -> {
-
-                    // Create the city population report using the shared connection.
-                    US31_CityPopulationReport us31 =
-                            new US31_CityPopulationReport(con);
-
-                    // Display the selected city's population.
-                    us31.run(cityArg, cityCountryArg);
-                });
-
-                // Stop here so that only US31 runs during testing.
-                return;
-            }
-
-
-
-            // US01: All countries in the world ordered by population.
-            runReport("US01 - All Countries in the World by Population",
-                    () -> US01_view_all_countries_in_the_world.printReport(con));
-            // US02: Countries grouped by continent.
-            runReport("US02 - Countries Grouped by Continent",
-                    () -> US02_view_all_countries_in_a_continent.printReport(con));
-
-            // US03 - View all countries in each region, ordered by population.
-            runReport("US03 - View All Countries in a Region",
-                    () -> printCountriesByRegion(con));
-
-            // US07: View all cities in the world.
-            runReport("US07 - View All Cities in the World",
-                    () -> printAllCities(con));
-
-            // US08 - View all cities in a continent
-            runReport("US08 - View All Cities in a Continent", () -> {
-                ViewCitiesinaContinent us08 = new ViewCitiesinaContinent(con);
-                us08.getCitiesInContinent("Asia");
-            });
-
-            // US09 - View all cities in a region
-            runReport("US09 - View All Cities in a Region", () -> {
-                ViewAllCitiesinaRegion us09 = new ViewAllCitiesinaRegion(con);
-                us09.getCitiesInRegion("Southeast Asia");
-            });
-
-            // US13: Top Populated Cities in a Continent
-            runReport("US13 - Top Populated Cities in a Continent",
-                    () -> TopCitiesInContinent.generateReport(con, "Asia", 10));
-
-            // US14: Top Populated Cities in a Region
-            runReport("US14 - Top Populated Cities in a Region",
-                    () -> TopCitiesInRegion.generateReport(con, "Southeast Asia", 10));
-
-            // US15: Top Populated Cities in a Country
-            runReport("US15 - Top Populated Cities in a Country",
-                    () -> TopCitiesInCountry.generateReport(con, "Japan", 10));
-
-            // US17: View all capital cities in the world.
-            runReport("US17 - All Capital Cities in the World", () -> {
-                ArrayList<CapitalCity> capitals = AllCapitalsCitiesInTheWorld_US17.getAll(con);
-                AllCapitalsCitiesInTheWorld_US17.printReport(capitals);
-            });
-
-            // US18: Capital cities by continent.
-            runReport("US18 - Capital Cities by Continent", () -> {
-                String continent = "Europe";
-                ArrayList<CapitalCity> capitals = CapitalCitiesInAcontinent
-                        .getCapitalCitiesByContinent(con, continent);
-                CapitalCitiesInAcontinent.printReport(capitals, continent);
-            });
-
-            // US19: Capital cities by region.
-            runReport("US19 - Capital Cities by Region", () -> {
-                String region = "Caribbean";
-                ArrayList<CapitalCity> capitals = CapitalsCitiesInAregion
-                        .getCapitalCitiesByRegion(con, region);
-                CapitalsCitiesInAregion.printReport(capitals, region);
-            });
-
-            // US25: Total, city, and non-city population for each country.
-            runReport("US25 - Population by Country", () -> {
-                ArrayList<Population> populations = ViewPopulationByCountry.getPopulationByCountry(con);
-                ViewPopulationByCountry.printReport(populations);
-            });
-
-            // US26: Total world population.
-            runReport("US26 - Total World Population",
-                    () -> TotalWorldPopulation.printReport(con));
-
-            // Country population report; blank argument displays all countries.
-            runReport("Country Population Report", () -> {
-                CountryPopulationReport report = new CountryPopulationReport(con);
-                report.run(countryArg);
-            });
-
-            // District population report; blank argument displays all districts.
-            runReport("District Population Report", () -> {
-                DistrictPopulationReport report = new DistrictPopulationReport(con);
-                report.run(districtArg);
-            });
-
-            System.out.println("\nAll reports available in this project have finished.");
-
-        } catch (SQLException e) {
-            System.err.println("ERROR while closing the shared database connection: " + e.getMessage());
-        }
-    }
-
-    private static Connection connectToDatabase(String dbUrl, String dbUser, String dbPassword) {
-        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-            System.out.println("Connecting to MySQL (attempt " + attempt + "/" + MAX_ATTEMPTS + ")...");
+            System.out.println("Connecting to database...");
 
             try {
-                Connection con = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
-                System.out.println("Connected to MySQL.");
-                return con;
+
+                // Establish a connection to the world database.
+                con = DriverManager.getConnection(
+                        url,
+                        username,
+                        password
+                );
+
+                System.out.println(
+                        "Successfully connected to MySQL."
+                );
+
+                break;
+
             } catch (SQLException e) {
-                System.err.println("Connection failed: " + e.getMessage());
 
-                if (attempt == MAX_ATTEMPTS) {
-                    break;
-                }
+                System.err.println(
+                        "Database connection attempt "
+                                + (i + 1)
+                                + " failed: "
+                                + e.getMessage()
+                );
 
-                try {
-                    Thread.sleep(RETRY_DELAY_MS);
-                } catch (InterruptedException interrupted) {
-                    Thread.currentThread().interrupt();
-                    System.err.println("Database retry was interrupted.");
-                    return null;
+                // Wait before attempting to reconnect.
+                if (i < MAX_ATTEMPTS - 1) {
+
+                    try {
+                        Thread.sleep(RETRY_DELAY_MS);
+
+                    } catch (InterruptedException ie) {
+
+                        // Restore the interrupted status.
+                        Thread.currentThread().interrupt();
+
+                        System.err.println(
+                                "Database connection was interrupted."
+                        );
+
+                        return;
+                    }
                 }
             }
         }
 
-        return null;
+        // Stop execution if the database connection failed.
+        if (con == null) {
+
+            System.err.println(
+                    "Could not connect to the database after "
+                            + MAX_ATTEMPTS + " attempts."
+            );
+
+            return;
+        }
+
+        // Automatically close the database connection after the report.
+        try (Connection connection = con) {
+
+            System.out.println(
+                    "Database connection established."
+            );
+
+            // Check whether the required database tables exist.
+            if (!isDatabaseReady(connection)) {
+
+                System.err.println(
+                        "Required database tables are unavailable."
+                );
+
+                return;
+            }
+
+            // Display the selected city and report information.
+            System.out.println();
+            System.out.println("==============================================");
+            System.out.println(
+                    "Running: US31 - Total Population of a Selected City"
+            );
+            System.out.println("==============================================");
+
+            System.out.println(
+                    "Selected City: " + cityName
+            );
+
+            // Create the US31 report using the database connection.
+            US31_CityPopulationReport report =
+                    new US31_CityPopulationReport(connection);
+
+            // Execute the selected city population report.
+            report.run(cityName, countryName);
+
+            System.out.println();
+            System.out.println(
+                    "US31 report execution completed."
+            );
+
+        } catch (SQLException e) {
+
+            // Handle database errors during report execution.
+            System.err.println(
+                    "Error executing US31 report: "
+                            + e.getMessage()
+            );
+        }
     }
 
-    private static boolean isDatabaseReady(Connection con) {
-        String[] requiredTables = {"country", "city", "countrylanguage"};
+    /**
+     * Check whether the required database tables are available.
+     *
+     * @param connection active MySQL database connection
+     * @return true if all required tables exist
+     */
+    private static boolean isDatabaseReady(
+            Connection connection) {
+
+        // Tables required by the US31 SQL query.
+        String[] requiredTables = {
+                "city",
+                "country"
+        };
 
         try {
-            for (String table : requiredTables) {
-                String sql = "SELECT COUNT(*) FROM information_schema.tables "
-                        + "WHERE table_schema = DATABASE() "
-                        + "AND table_name = ?";
 
-                try (PreparedStatement statement = con.prepareStatement(sql)) {
+            for (String table : requiredTables) {
+
+                String sql =
+                        "SELECT COUNT(*) "
+                                + "FROM information_schema.tables "
+                                + "WHERE table_schema = DATABASE() "
+                                + "AND table_name = ?";
+
+                try (PreparedStatement statement =
+                             connection.prepareStatement(sql)) {
+
+                    // Safely provide the table name.
                     statement.setString(1, table);
-                    try (ResultSet result = statement.executeQuery()) {
-                        if (!result.next() || result.getInt(1) == 0) {
-                            System.err.println("Missing required table: " + table);
+
+                    try (ResultSet result =
+                                 statement.executeQuery()) {
+
+                        if (!result.next()
+                                || result.getInt(1) == 0) {
+
+                            System.err.println(
+                                    "Missing required table: " + table
+                            );
+
                             return false;
                         }
                     }
                 }
             }
 
-            System.out.println("Database check passed.");
+            System.out.println(
+                    "Database check passed."
+            );
+
             return true;
+
         } catch (SQLException e) {
-            System.err.println("Could not validate database tables: " + e.getMessage());
+
+            System.err.println(
+                    "Database validation failed: "
+                            + e.getMessage()
+            );
+
             return false;
-        }
-    }
-
-    /**
-     * US03: Query real country records, grouped by region and ordered by
-     * population descending within each region.
-     */
-    private static void printCountriesByRegion(Connection con) throws SQLException {
-        String sql = "SELECT c.Code, c.Name, c.Continent, c.Region, "
-                + "c.Population, capital.Name AS Capital "
-                + "FROM country c "
-                + "LEFT JOIN city capital ON c.Capital = capital.ID "
-                + "ORDER BY c.Region ASC, c.Population DESC, c.Name ASC";
-
-        String currentRegion = null;
-        String line = "-".repeat(125);
-        int count = 0;
-
-        try (PreparedStatement statement = con.prepareStatement(sql);
-             ResultSet rs = statement.executeQuery()) {
-
-            while (rs.next()) {
-                String region = rs.getString("Region");
-                if (region == null) {
-                    region = "Unknown";
-                }
-
-                if (!region.equals(currentRegion)) {
-                    if (currentRegion != null) {
-                        System.out.println(line);
-                    }
-                    currentRegion = region;
-                    System.out.println("\nRegion: " + currentRegion);
-                    System.out.println(line);
-                    System.out.printf(
-                            "| %-5s | %-24s | %-18s | %-28s | %15s | %-20s |%n",
-                            "Code", "Country", "Continent", "Region",
-                            "Population", "Capital"
-                    );
-                    System.out.println(line);
-                }
-
-                long population = rs.getLong("Population");
-                String capital = rs.getString("Capital");
-                if (capital == null) {
-                    capital = "Unknown";
-                }
-
-                System.out.printf(
-                        Locale.US,
-                        "| %-5s | %-24.24s | %-18.18s | %-28.28s | %,15d | %-20.20s |%n",
-                        rs.getString("Code"),
-                        rs.getString("Name"),
-                        rs.getString("Continent"),
-                        region,
-                        population,
-                        capital
-                );
-                count++;
-            }
-        }
-
-        if (count == 0) {
-            System.out.println("No country records found.");
-        } else {
-            System.out.println(line);
-            System.out.println("Countries displayed: " + count);
-        }
-    }
-
-    /**
-     * US07: Query and display every city in the database.
-     */
-    private static void printAllCities(Connection con) throws SQLException {
-        String sql = "SELECT city.Name AS CityName, country.Name AS CountryName, "
-                + "city.District AS DistrictName, "
-                + "city.Population AS CityPopulation "
-                + "FROM city "
-                + "JOIN country ON city.CountryCode = country.Code "
-                + "ORDER BY city.Population DESC, city.Name ASC";
-
-        int count = 0;
-        System.out.println("\nUS07 - All Cities in the World");
-        System.out.printf(
-                "%-35s %-45s %-30s %18s%n",
-                "City", "Country", "District", "Population"
-        );
-        System.out.println("-".repeat(135));
-
-        try (PreparedStatement statement = con.prepareStatement(sql);
-             ResultSet rs = statement.executeQuery()) {
-
-            while (rs.next()) {
-                City city = new City();
-                city.setName(rs.getString("CityName"));
-                city.setCountry(rs.getString("CountryName"));
-                city.setDistrict(rs.getString("DistrictName"));
-                city.setPopulation(rs.getLong("CityPopulation"));
-
-                System.out.printf(
-                        Locale.US,
-                        "%-35.35s %-45.45s %-30.30s %,18d%n",
-                        city.getName(),
-                        city.getCountry(),
-                        city.getDistrict() == null ? "" : city.getDistrict(),
-                        city.getPopulation()
-                );
-                count++;
-            }
-        }
-
-        if (count == 0) {
-            System.out.println("No city records found.");
-        } else {
-            System.out.println("Cities displayed: " + count);
-        }
-    }
-
-    @FunctionalInterface
-    private interface SqlReport {
-        void run() throws SQLException;
-    }
-
-    /**
-     * A report failure is logged, and the next report still runs. This method
-     * never closes the shared database connection.
-     */
-    private static void runReport(String name, SqlReport report) {
-        System.out.println("\n==================================================");
-        System.out.println("Running: " + name);
-        System.out.println("==================================================");
-
-        try {
-            report.run();
-        } catch (SQLException | RuntimeException e) {
-            System.err.println("Report failed: " + name + " - " + e.getMessage());
         }
     }
 }
