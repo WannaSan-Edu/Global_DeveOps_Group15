@@ -167,7 +167,15 @@ public class App {
                         .getCapitalCitiesByRegion(con, region);
                 CapitalsCitiesInAregion.printReport(capitals, region);
             });
+            // US20: Top N capital cities in the world.
+            runReport("US20 - Top N Capital Cities in the World", () -> {
+                int n = 10;
 
+                ArrayList<CapitalCity> capitals =
+                        ViewTopNCapitalCitiesInTheWorld_US20.getTopN(con, n);
+
+                ViewTopNCapitalCitiesInTheWorld_US20.printReport(capitals, n);
+            });
 
             // US23 - View Population by Continent
             runReport("US23 - Population by Continent",
