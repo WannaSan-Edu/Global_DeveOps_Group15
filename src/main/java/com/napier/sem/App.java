@@ -118,6 +118,18 @@ public class App {
                 ViewCitiesInACountry_US10 us10 = new ViewCitiesInACountry_US10(con);
                 us10.getCitiesInCountry("Myanmar");
             });
+          
+            // US11 - View all cities in a district
+            runReport("US11 - View All Cities in a District", () -> {
+                ViewAllCitiesInaDistrict_US11 us11= new ViewAllCitiesInaDistrict_US11(con);
+                us11.getCitiesInDistrict("Mandalay");
+            });
+          
+             // US12 - View top N cities in the world
+            runReport("US12 - View Top N Cities in the World", () -> {
+                ViewTopCitiesInTheWorld_US12 us12 = new ViewTopCitiesInTheWorld_US12(con);
+                us12.getTopNCitiesInWorld(10);
+            });
 
             // US13: Top Populated Cities in a Continent
             runReport("US13 - Top Populated Cities in a Continent",
