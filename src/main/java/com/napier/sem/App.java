@@ -108,6 +108,12 @@ public class App {
                 us09.getCitiesInRegion("Southeast Asia");
             });
 
+            // US10 - View all cities in a country
+            runReport("US10 - View All Cities in a Country", () -> {
+                ViewCitiesInACountry_US10 us10 = new ViewCitiesInACountry_US10(con);
+                us10.getCitiesInCountry("Myanmar");
+            });
+
             // US13: Top Populated Cities in a Continent
             runReport("US13 - Top Populated Cities in a Continent",
                     () -> TopCitiesInContinent.generateReport(con, "Asia", 10));
