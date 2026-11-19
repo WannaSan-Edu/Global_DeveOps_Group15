@@ -194,6 +194,10 @@ public class App {
             runReport("US23 - Population by Continent",
                     () -> PopulationByContinent_US023.generateReport(con));
 
+            // US24: Population by Region
+            runReport("US24 - Population by Region",
+                    () -> PopulationByRegion_US24.generateReport(con));
+
             // US25: Total, city, and non-city population for each country.
             runReport("US25 - Population by Country", () -> {
                 ArrayList<Population> populations =
