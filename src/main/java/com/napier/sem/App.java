@@ -234,6 +234,13 @@ public class App {
                 report.run(districtArg);
             });
 
+            // US31: View population of a selected city.
+            runReport("US31 - Population of a Selected City", () -> {
+                ViewPopulationOfSelectedCity_US31 us31 =
+                        new ViewPopulationOfSelectedCity_US31(con);
+
+                us31.run("Yangon", "Myanmar");
+            });
 
             // US32: View Population by Language.
             runReport("US32 - Population by Language", () -> {
