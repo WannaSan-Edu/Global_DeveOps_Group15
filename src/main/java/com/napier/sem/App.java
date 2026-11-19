@@ -242,6 +242,14 @@ public class App {
                 us31.run("Yangon", "Myanmar");
             });
 
+            // US32: View Population by Language.
+            runReport("US32 - Population by Language", () -> {
+                US32_PopulationByLanguageReport us32 =
+                        new US32_PopulationByLanguageReport(con);
+
+                us32.run();
+            });
+
             System.out.println("\nAll reports available in this project have finished.");
 
         } catch (SQLException e) {
