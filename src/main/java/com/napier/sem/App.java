@@ -107,6 +107,11 @@ public class App {
                 ViewAllCitiesinaRegion us09 = new ViewAllCitiesinaRegion(con);
                 us09.getCitiesInRegion("Southeast Asia");
             });
+        // US12 - View top N cities in the world
+            runReport("US12 - View Top N Cities in the World", () -> {
+                ViewTopCitiesInTheWorld_US12 us12 = new ViewTopCitiesInTheWorld_US12(con);
+                us12.getTopNCitiesInWorld(10);
+            });
 
             // US10 - View all cities in a country
             runReport("US10 - View All Cities in a Country", () -> {
@@ -166,6 +171,11 @@ public class App {
             // US20: Top N capital cities in the world.
             runReport("US20 - Top N Capital Cities in the World", () -> {
                 int n = 10;
+               ArrayList<CapitalCity> capitals = ViewTopNCapitalCitiesInTheWorld_US20.getTopN(con, n);
+
+                ViewTopNCapitalCitiesInTheWorld_US20.printReport(capitals, n);
+            });
+
 
             // US21: Top N capital cities in a selected continent.
             // Change "Asia" and 10 to the continent and N required.
