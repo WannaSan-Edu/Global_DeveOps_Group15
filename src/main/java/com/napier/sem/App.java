@@ -190,6 +190,10 @@ public class App {
                     () -> ViewTopNCapitalCitiesInARegion_US22
                             .generateReport(con, "Caribbean", 10));
 
+            // US23 - View Population by Continent
+            runReport("US23 - Population by Continent",
+                    () -> PopulationByContinent_US023.generateReport(con));
+
             // US25: Total, city, and non-city population for each country.
             runReport("US25 - Population by Country", () -> {
                 ArrayList<Population> populations =
@@ -197,13 +201,22 @@ public class App {
                 ViewPopulationByCountry.printReport(populations);
             });
 
-
-           
-
-
             // US26: Total world population.
             runReport("US26 - Total World Population",
                     () -> TotalWorldPopulation.printReport(con));
+
+            // US27: View population of a selected continent.
+            runReport("US27 - Population of a Continent", () -> {
+                String continent = "Asia";
+                ViewPopulationOfAContinent_US27.getPopulationOfContinent(
+                        con, continent);
+            });
+
+            // US28: View population of a selected region.
+            runReport("US28 - Population of a Region", () -> {
+                String region = "Caribbean";
+                ViewPopulationOfARegion_US28.getPopulationOfRegion(con, region);
+            });
 
             // Country population report; blank argument displays all countries.
             runReport("Country Population Report", () -> {
