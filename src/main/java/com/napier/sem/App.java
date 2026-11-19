@@ -223,6 +223,12 @@ public class App {
                 DistrictPopulationReport report = new DistrictPopulationReport(con);
                 report.run(districtArg);
             });
+            // US31: Total Population of a Selected City.
+            if (!cityName.isBlank()) {
+             runReport("US31 - Total Population of a Selected City", () -> {
+             US31_CityPopulationReport report = new US31_CityPopulationReport(con);
+             List<City> cities = report.getCityPopulation(cityName, cityCountry);
+             report.displayReport(cities, cityName, cityCountry);});}
 
             System.out.println("\nAll reports available in this project have finished.");
 
