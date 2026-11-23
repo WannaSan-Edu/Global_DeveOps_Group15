@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * {@link CapitalCity}, and {@link Population}). Verifies initial default field states and
  * individual getter/setter behavior without requiring a database connection.
  */
-class MyTest {
+class UnitTest {
 
     // =========================================================================
     // Default Value Tests: Verify uninitialized object state before mutation
