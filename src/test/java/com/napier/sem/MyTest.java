@@ -4,11 +4,18 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Pure unit tests for all getters, setters, and defaults on model classes. */
+/**
+ * Pure JUnit 5 unit tests for domain model classes ({@link City}, {@link Country},
+ * {@link CapitalCity}, and {@link Population}). Verifies initial default field states and
+ * individual getter/setter behavior without requiring a database connection.
+ */
 class MyTest {
 
-    // --- Default value tests ---
+    // =========================================================================
+    // Default Value Tests: Verify uninitialized object state before mutation
+    // =========================================================================
 
+    /** Ensures a newly instantiated {@link City} starts with null strings and zero population. */
     @Test
     void city_defaultValues() {
         City city = new City();
@@ -20,6 +27,7 @@ class MyTest {
         );
     }
 
+    /** Ensures a newly instantiated {@link Country} starts with null text fields and zero population. */
     @Test
     void country_defaultValues() {
         Country country = new Country();
@@ -33,6 +41,7 @@ class MyTest {
         );
     }
 
+    /** Ensures a newly instantiated {@link CapitalCity} starts with null text fields and zero population. */
     @Test
     void capitalCity_defaultValues() {
         CapitalCity capital = new CapitalCity();
@@ -44,6 +53,7 @@ class MyTest {
         );
     }
 
+    /** Ensures a newly instantiated {@link Population} summary starts with null name and zero metrics. */
     @Test
     void population_defaultValues() {
         Population population = new Population();
@@ -51,13 +61,16 @@ class MyTest {
                 () -> assertNull(population.getName()),
                 () -> assertEquals(0L, population.getTotal()),
                 () -> assertEquals(0L, population.getCityPopulation()),
+                // Use a small delta (0.0001) for floating-point percentage comparisons
                 () -> assertEquals(0.0, population.getCityPercentage(), 0.0001),
                 () -> assertEquals(0L, population.getNonCityPopulation()),
                 () -> assertEquals(0.0, population.getNonCityPercentage(), 0.0001)
         );
     }
 
-    // --- City getter & setter tests ---
+    // =========================================================================
+    // City Getter & Setter Tests
+    // =========================================================================
 
     @Test
     void city_setAndGetName() {
@@ -87,7 +100,9 @@ class MyTest {
         assertEquals(4_088_000L, city.getPopulation());
     }
 
-    // --- Country getter & setter tests ---
+    // =========================================================================
+    // Country Getter & Setter Tests
+    // =========================================================================
 
     @Test
     void country_setAndGetCode() {
@@ -131,7 +146,9 @@ class MyTest {
         assertEquals("Rangoon (Yangon)", country.getCapital());
     }
 
-    // --- CapitalCity getter & setter tests ---
+    // =========================================================================
+    // CapitalCity Getter & Setter Tests
+    // =========================================================================
 
     @Test
     void capitalCity_setAndGetName() {
@@ -161,7 +178,9 @@ class MyTest {
         assertEquals(2_125_246L, capital.getPopulation());
     }
 
-    // --- Population getter & setter tests ---
+    // =========================================================================
+    // Population Getter & Setter Tests
+    // =========================================================================
 
     @Test
     void population_setAndGetName() {
@@ -188,6 +207,7 @@ class MyTest {
     void population_setAndGetCityPercentage() {
         Population population = new Population();
         population.setCityPercentage(25.0);
+        // Allow 0.0001 tolerance for IEEE 754 floating-point representation
         assertEquals(25.0, population.getCityPercentage(), 0.0001);
     }
 
@@ -202,6 +222,7 @@ class MyTest {
     void population_setAndGetNonCityPercentage() {
         Population population = new Population();
         population.setNonCityPercentage(75.0);
+        // Allow 0.0001 tolerance for IEEE 754 floating-point representation
         assertEquals(75.0, population.getNonCityPercentage(), 0.0001);
     }
 }

@@ -16,15 +16,24 @@ import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Database integration tests for US01-US32 using the real MySQL world database. */
+/**
+ * End-to-end database integration tests for user stories US01 through US32 against a live
+ * MySQL {@code world} database. Each test opens a fresh connection, executes report logic,
+ * and asserts that non-empty or expected report output is written to standard output.
+ */
 class AppIntegrationTest {
 
+    // Preserve original standard streams and system locale so test side effects do not leak
     private PrintStream originalOut;
     private PrintStream originalErr;
     private Locale originalLocale;
     private ByteArrayOutputStream out;
     private ByteArrayOutputStream err;
 
+    /**
+     * Redirects stdout/stderr to UTF-8 buffers and fixes locale to US before each test so
+     * formatted numbers and report headers behave deterministically across environments.
+     */
     @BeforeEach
     void captureConsole() {
         originalOut = System.out;
@@ -37,6 +46,7 @@ class AppIntegrationTest {
         System.setErr(new PrintStream(err, true, StandardCharsets.UTF_8));
     }
 
+    /** Restores original standard streams and default locale after each test completes. */
     @AfterEach
     void restoreConsole() {
         System.setOut(originalOut);
@@ -44,6 +54,10 @@ class AppIntegrationTest {
         Locale.setDefault(originalLocale);
     }
 
+    /**
+     * Opens a JDBC connection to the MySQL {@code world} database using JVM system properties or
+     * environment variables when provided, falling back to the local Docker test defaults.
+     */
     private Connection connection() throws SQLException {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -58,6 +72,7 @@ class AppIntegrationTest {
         return DriverManager.getConnection(url, user, password);
     }
 
+    /** Resolves configuration from a non-blank system property first, then environment variable. */
     private static String setting(String name, String fallback) {
         String value = System.getProperty(name);
         if (value == null || value.isBlank()) {
@@ -66,6 +81,7 @@ class AppIntegrationTest {
         return (value == null || value.isBlank()) ? fallback : value;
     }
 
+    /** Executes a scalar SQL query expected to return at least one row and reads column 1 as long. */
     private long firstLong(Connection con, String sql) throws SQLException {
         try (Statement statement = con.createStatement(); ResultSet rs = statement.executeQuery(sql)) {
             if (!rs.next()) {
@@ -75,15 +91,19 @@ class AppIntegrationTest {
         }
     }
 
+    /** Returns all characters captured from {@code System.out} during the current test. */
     private String out() {
         return out.toString(StandardCharsets.UTF_8);
     }
 
-    // --- Country reports (US01-US03) ---
+    // =========================================================================
+    // Country Reports (US01-US03): Full and grouped country population listings
+    // =========================================================================
 
     @Test
     void us01_reportsCountriesFromWorldDatabase() throws Exception {
         try (Connection con = connection()) {
+            // Guard against an unseeded database before asserting report contents
             assertTrue(firstLong(con, "SELECT COUNT(*) FROM country") > 0);
             US01_view_all_countries_in_the_world.printReport(con);
             assertTrue(out().contains("China") || out().contains("India"), out());
@@ -106,7 +126,9 @@ class AppIntegrationTest {
         }
     }
 
-    // --- Top N country reports (US04-US06) ---
+    // =========================================================================
+    // Top N Country Reports (US04-US06): Ranked countries by population
+    // =========================================================================
 
     @Test
     void us04_returnsTopCountriesWorldwide() throws Exception {
@@ -132,7 +154,9 @@ class AppIntegrationTest {
         }
     }
 
-    // --- City reports (US07-US12) ---
+    // =========================================================================
+    // City Reports (US07-US12): City listings and global top-N city report
+    // =========================================================================
 
     @Test
     void us07_listsCitiesWorldwide() throws Exception {
@@ -183,7 +207,9 @@ class AppIntegrationTest {
         }
     }
 
-    // --- Top N city reports (US13-US16) ---
+    // =========================================================================
+    // Top N City Reports (US13-US16): Scoped top-N populated cities
+    // =========================================================================
 
     @Test
     void us13_returnsTopCitiesInAsia() throws Exception {
@@ -217,7 +243,9 @@ class AppIntegrationTest {
         }
     }
 
-    // --- Capital city reports (US17-US22) ---
+    // =========================================================================
+    // Capital City Reports (US17-US22): Full and top-N capital city listings
+    // =========================================================================
 
     @Test
     void us17_returnsAllCapitalCities() throws Exception {
@@ -279,7 +307,9 @@ class AppIntegrationTest {
         }
     }
 
-    // --- Population breakdown reports (US23-US25) ---
+    // =========================================================================
+    // Population Breakdown Reports (US23-US25): Urban vs. non-urban splits
+    // =========================================================================
 
     @Test
     void us23_generatesPopulationBreakdownByContinent() throws Exception {
@@ -308,7 +338,9 @@ class AppIntegrationTest {
         }
     }
 
-    // --- Population total reports (US26-US31) ---
+    // =========================================================================
+    // Population Total Reports (US26-US31): Aggregate population by scope
+    // =========================================================================
 
     @Test
     void us26_reportsTotalWorldPopulation() throws Exception {
@@ -352,13 +384,16 @@ class AppIntegrationTest {
 
     @Test
     void us31_reportsPopulationOfYangonInMyanmar() throws Exception {
+        // The world dataset records Yangon under its historical city name "Rangoon"
         try (Connection con = connection()) {
             new ViewPopulationOfSelectedCity_US31(con).run("Rangoon", "Myanmar");
             assertFalse(out().isBlank(), "US31 should produce report output");
         }
     }
 
-    // --- Language report (US32) ---
+    // =========================================================================
+    // Language Report (US32): Speaker counts across major world languages
+    // =========================================================================
 
     @Test
     void us32_reportsPopulationByLanguage() throws Exception {
