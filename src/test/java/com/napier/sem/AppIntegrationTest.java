@@ -54,7 +54,7 @@ class AppIntegrationTest {
         String url = setting("WORLD_DB_URL",
                 "jdbc:mysql://localhost:33060/world?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC");
         String user = setting("WORLD_DB_USER", "root");
-        String password = setting("WORLD_DB_PASSWORD", "");
+        String password = setting("WORLD_DB_PASSWORD", "example");
         return DriverManager.getConnection(url, user, password);
     }
 

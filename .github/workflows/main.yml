@@ -3,7 +3,7 @@ on: push
 
 jobs:
   UnitTests:
-    name: Unit Test Build Action
+    name: Unit Test
     runs-on: ubuntu-26.04
     steps:
       - name: Checkout
