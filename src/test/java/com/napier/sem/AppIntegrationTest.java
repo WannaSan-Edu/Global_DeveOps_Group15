@@ -17,9 +17,9 @@ import java.util.Locale;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * End-to-end database integration tests for user stories US01 through US32 against a live
- * MySQL {@code world} database. Each test opens a fresh connection, executes report logic,
- * and asserts that non-empty or expected report output is written to standard output.
+ * End-to-end database integration tests for {@link App#main(String[])} and user stories
+ * US01 through US32 against a live MySQL {@code world} database. Each test opens a fresh
+ * connection or invokes the application entry point and asserts expected output.
  */
 class AppIntegrationTest {
 
@@ -94,6 +94,58 @@ class AppIntegrationTest {
     /** Returns all characters captured from {@code System.out} during the current test. */
     private String out() {
         return out.toString(StandardCharsets.UTF_8);
+    }
+
+    /** Returns all characters captured from {@code System.err} during the current test. */
+    private String err() {
+        return err.toString(StandardCharsets.UTF_8);
+    }
+
+    // =========================================================================
+    // Application Entry Point Tests (App.main): End-to-end execution flow
+    // =========================================================================
+
+    /**
+     * Verifies that {@link App#main(String[])} connects to MySQL, passes the schema table check,
+     * and executes the full report pipeline when country and district arguments are supplied.
+     */
+    @Test
+    void appMain_withCountryAndDistrictArgs_runsAllReports() {
+        App.main(new String[]{"Myanmar", "Mandalay"});
+
+        assertTrue(out().contains("Database connection established."),
+                "App should connect to MySQL. Output:\n" + out() + "\nErrors:\n" + err());
+        assertTrue(out().contains("Database check passed."),
+                "App should validate required world tables. Output:\n" + out());
+        assertTrue(out().contains("US01 - All Countries in the World by Population"),
+                "App should execute US01 report. Output:\n" + out());
+        assertTrue(out().contains("US32 - Population by Language"),
+                "App should execute US32 report. Output:\n" + out());
+        assertTrue(out().contains("All reports available in this project have finished."),
+                "App should finish all reports. Output:\n" + out() + "\nErrors:\n" + err());
+        // Ensure no fatal connection or missing-table errors occurred during the run
+        assertFalse(err().contains("ERROR: Could not connect to MySQL"),
+                "Unexpected connection error:\n" + err());
+        assertFalse(err().contains("Required world database tables are unavailable"),
+                "Unexpected schema validation error:\n" + err());
+    }
+
+    /**
+     * Verifies that {@link App#main(String[])} runs cleanly with empty arguments so optional
+     * country and district filters default to blank and display all records.
+     */
+    @Test
+    void appMain_withNoArgs_runsDefaultReports() {
+        App.main(new String[]{});
+
+        assertTrue(out().contains("Database connection established."),
+                "App should connect to MySQL. Output:\n" + out() + "\nErrors:\n" + err());
+        assertTrue(out().contains("Country Population Report"),
+                "App should run Country Population Report. Output:\n" + out());
+        assertTrue(out().contains("District Population Report"),
+                "App should run District Population Report. Output:\n" + out());
+        assertTrue(out().contains("All reports available in this project have finished."),
+                "App should finish all reports with empty args. Output:\n" + out());
     }
 
     // =========================================================================

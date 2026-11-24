@@ -17,6 +17,8 @@ Develop Build Status
 
 [![Releases](https://img.shields.io/github/release/WannaSan-Edu/Global_DeveOps_Group15/all.svg?style=flat-square)](https://github.com/WannaSan-Edu/Global_DeveOps_Group15/releases)
 
+[![codecov](https://codecov.io/gh/WannaSan-Edu/Global_DeveOps_Group15/branch/Testing/graph/badge.svg)](https://codecov.io/gh/WannaSan-Edu/Global_DeveOps_Group15)
+
 ---
 
 ## Group Contribution

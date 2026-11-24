@@ -17,8 +17,8 @@ import java.util.Locale;
  */
 public class App {
 
-    private static final int MAX_ATTEMPTS = 100;
-    private static final long RETRY_DELAY_MS = 3000;
+    private static final int MAX_ATTEMPTS = 20;
+    private static final long RETRY_DELAY_MS = 60;
 
     public static void main(String[] args) {
         try {
