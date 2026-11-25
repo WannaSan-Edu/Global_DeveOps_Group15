@@ -222,13 +222,13 @@ public class App {
             });
 
             // Country population report; blank argument displays all countries.
-            runReport("Country Population Report", () -> {
+            runReport("US29 - Country Population Report", () -> {
                 CountryPopulationReport report = new CountryPopulationReport(con);
                 report.run(countryArg);
             });
 
             // District population report; blank argument displays all districts.
-            runReport("District Population Report", () -> {
+            runReport("US30 - District Population Report", () -> {
                 DistrictPopulationReport report = new DistrictPopulationReport(con);
                 report.run(districtArg);
             });
