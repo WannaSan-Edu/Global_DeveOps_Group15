@@ -601,4 +601,17 @@ class AppIntegrationTest {
         closedReport.run();
         assertTrue(out().contains("Cannot generate US32 report: Database connection is closed."), out());
     }
+
+    @Test
+    void appMain_withOnlyCountryArg_runsAllReportsAndUsesDefaultDistrict() {
+        App.main(new String[]{"Myanmar"});
+
+        assertTrue(out().contains("Database connection established."),
+                "Output:\n" + out() + "\nErrors:\n" + err());
+        assertTrue(out().contains("US29 - Country Population Report"), out());
+        assertTrue(out().contains("US30 - District Population Report"), out());
+        assertTrue(out().contains("All reports available in this project have finished."),
+                "Output:\n" + out() + "\nErrors:\n" + err());
+    }
+
 }

@@ -8,6 +8,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -43,6 +50,8 @@ class UnitTest {
         System.setOut(originalOut);
         System.setErr(originalErr);
         Locale.setDefault(originalLocale);
+        // Do not leak an interrupt flag into another JUnit test.
+        Thread.interrupted();
     }
 
     private String out() {
@@ -347,4 +356,405 @@ class UnitTest {
                 () -> US32_PopulationByLanguageReport.calculateWorldPercentage(
                         BigDecimal.ONE, BigDecimal.ZERO));
     }
+
+    // =========================================================================
+    // App Internal Unit Tests (database readiness and report error handling)
+    // =========================================================================
+
+    /** Creates a JDBC ResultSet proxy for App.isDatabaseReady tests. */
+    private ResultSet readinessResultSet(boolean hasRow, int tableCount) {
+        return (ResultSet) Proxy.newProxyInstance(
+                ResultSet.class.getClassLoader(),
+                new Class<?>[]{ResultSet.class},
+                (proxy, method, args) -> {
+                    switch (method.getName()) {
+                        case "next": return hasRow;
+                        case "getInt": return tableCount;
+                        case "close": return null;
+                        default: return primitiveDefault(method.getReturnType());
+                    }
+                });
+    }
+
+    /** Creates a JDBC Connection proxy; failAtPrepare simulates an SQL error. */
+    private Connection readinessConnection(boolean hasRow, int tableCount,
+                                           boolean failAtPrepare) {
+        PreparedStatement statement = (PreparedStatement) Proxy.newProxyInstance(
+                PreparedStatement.class.getClassLoader(),
+                new Class<?>[]{PreparedStatement.class},
+                (proxy, method, args) -> {
+                    switch (method.getName()) {
+                        case "executeQuery":
+                            return readinessResultSet(hasRow, tableCount);
+                        case "setString":
+                        case "close":
+                            return null;
+                        default:
+                            return primitiveDefault(method.getReturnType());
+                    }
+                });
+
+        return (Connection) Proxy.newProxyInstance(
+                Connection.class.getClassLoader(),
+                new Class<?>[]{Connection.class},
+                (proxy, method, args) -> {
+                    if (method.getName().equals("prepareStatement")) {
+                        if (failAtPrepare) {
+                            throw new SQLException("simulated database failure");
+                        }
+                        return statement;
+                    }
+                    if (method.getName().equals("close")) return null;
+                    if (method.getName().equals("isClosed")) return false;
+                    return primitiveDefault(method.getReturnType());
+                });
+    }
+
+    private Object primitiveDefault(Class<?> type) {
+        if (!type.isPrimitive() || type == void.class) return null;
+        if (type == boolean.class) return false;
+        if (type == char.class) return '\0';
+        if (type == byte.class) return (byte) 0;
+        if (type == short.class) return (short) 0;
+        if (type == int.class) return 0;
+        if (type == long.class) return 0L;
+        if (type == float.class) return 0F;
+        if (type == double.class) return 0D;
+        return null;
+    }
+
+    private boolean invokeDatabaseReady(Connection connection) throws Exception {
+        Method method = App.class.getDeclaredMethod("isDatabaseReady", Connection.class);
+        method.setAccessible(true);
+        return (boolean) method.invoke(null, connection);
+    }
+
+    @Test
+    void app_databaseReady_returnsTrueWhenRequiredTablesExist() throws Exception {
+        assertTrue(invokeDatabaseReady(readinessConnection(true, 1, false)));
+        assertTrue(out().contains("Database check passed."));
+    }
+
+    @Test
+    void app_databaseReady_returnsFalseWhenRequiredTableIsMissing() throws Exception {
+        assertFalse(invokeDatabaseReady(readinessConnection(true, 0, false)));
+        assertTrue(err().contains("Missing required table: country"));
+    }
+
+    @Test
+    void app_databaseReady_returnsFalseWhenQueryThrowsSQLException() throws Exception {
+        assertFalse(invokeDatabaseReady(readinessConnection(true, 1, true)));
+        assertTrue(err().contains("Could not validate database tables: simulated database failure"));
+    }
+
+    @Test
+    void app_connectToDatabase_returnsNullWhenRetryIsInterrupted() throws Exception {
+        Method method = App.class.getDeclaredMethod(
+                "connectToDatabase", String.class, String.class, String.class);
+        method.setAccessible(true);
+
+        Thread.currentThread().interrupt();
+        Object result;
+        try {
+            result = method.invoke(null, "jdbc:invalid:test", "user", "password");
+        } catch (InvocationTargetException exception) {
+            throw new AssertionError("Unexpected connection invocation failure",
+                    exception.getCause());
+        } finally {
+            Thread.interrupted();
+        }
+
+        assertNull(result);
+        assertTrue(err().contains("Database retry was interrupted."));
+    }
+
+    @Test
+    void app_runReportLogsSQLExceptionAndContinues() throws Exception {
+        invokeRunReport("Unit SQL failure", () -> {
+            throw new SQLException("test SQL error");
+        });
+
+        assertTrue(out().contains("Running: Unit SQL failure"));
+        assertTrue(err().contains("Report failed: Unit SQL failure - test SQL error"));
+    }
+
+    @Test
+    void app_runReportLogsRuntimeException() throws Exception {
+        invokeRunReport("Unit runtime failure", () -> {
+            throw new IllegalStateException("test runtime error");
+        });
+
+        assertTrue(err().contains(
+                "Report failed: Unit runtime failure - test runtime error"));
+    }
+
+    @Test
+    void app_runReportExecutesSuccessfulReport() throws Exception {
+        invokeRunReport("Successful unit report", () ->
+                System.out.println("UNIT_REPORT_EXECUTED"));
+
+        assertTrue(out().contains("UNIT_REPORT_EXECUTED"));
+        assertFalse(err().contains("Report failed"));
+    }
+
+    @FunctionalInterface
+    private interface TestSqlAction {
+        void run() throws SQLException;
+    }
+
+    private void invokeRunReport(String name, TestSqlAction action) throws Exception {
+        Class<?> reportType = Class.forName("com.napier.sem.App$SqlReport");
+        Object report = Proxy.newProxyInstance(
+                reportType.getClassLoader(), new Class<?>[]{reportType},
+                (proxy, method, args) -> {
+                    if (method.getName().equals("run")) {
+                        action.run();
+                        return null;
+                    }
+                    return primitiveDefault(method.getReturnType());
+                });
+
+        Method runReport = App.class.getDeclaredMethod(
+                "runReport", String.class, reportType);
+        runReport.setAccessible(true);
+        try {
+            runReport.invoke(null, name, report);
+        } catch (InvocationTargetException exception) {
+            throw new AssertionError("runReport unexpectedly propagated an exception",
+                    exception.getCause());
+        }
+    }
+
+    @Test
+    void us27AndUs28_handleSqlExceptionsFromDatabase() {
+        Connection failingConnection = readinessConnection(true, 1, true);
+
+        ViewPopulationOfAContinent_US27.getPopulationOfContinent(
+                failingConnection, "Asia");
+        ViewPopulationOfARegion_US28.getPopulationOfRegion(
+                failingConnection, "Southeast Asia");
+
+        assertTrue(err().contains("Failed to retrieve population for Asia"));
+        assertTrue(err().contains(
+                "Failed to retrieve population for region: Southeast Asia"));
+    }
+
+    // =========================================================================
+    // Branch-focused JDBC tests for US04, US27, US28, US31 and US32
+    // =========================================================================
+
+    /** Build a ResultSet proxy from ordered row maps; null values exercise wasNull branches. */
+    private ResultSet branchResultSet(java.util.List<java.util.Map<String, Object>> rows) {
+        final int[] index = {-1};
+        final boolean[] lastWasNull = {false};
+        return (ResultSet) Proxy.newProxyInstance(
+                ResultSet.class.getClassLoader(), new Class<?>[]{ResultSet.class},
+                (proxy, method, args) -> {
+                    String name = method.getName();
+                    if (name.equals("next")) return ++index[0] < rows.size();
+                    if (name.equals("wasNull")) return lastWasNull[0];
+                    if (name.equals("close")) return null;
+                    if (name.startsWith("get") && args != null && args.length == 1) {
+                        Object value = rows.get(index[0]).get(String.valueOf(args[0]));
+                        lastWasNull[0] = value == null;
+                        if (name.equals("getString")) return value == null ? null : String.valueOf(value);
+                        if (name.equals("getLong")) return value == null ? 0L : ((Number) value).longValue();
+                        if (name.equals("getInt")) return value == null ? 0 : ((Number) value).intValue();
+                        if (name.equals("getBigDecimal")) {
+                            if (value == null) return null;
+                            if (value instanceof BigDecimal) return value;
+                            return new BigDecimal(value.toString());
+                        }
+                    }
+                    return primitiveDefault(method.getReturnType());
+                });
+    }
+
+    private Connection branchConnection(java.util.List<java.util.Map<String, Object>> rows,
+                                        boolean closed, boolean failPrepare) {
+        PreparedStatement statement = (PreparedStatement) Proxy.newProxyInstance(
+                PreparedStatement.class.getClassLoader(), new Class<?>[]{PreparedStatement.class},
+                (proxy, method, args) -> {
+                    if (method.getName().equals("executeQuery")) return branchResultSet(rows);
+                    if (method.getName().equals("close") || method.getName().startsWith("set")) return null;
+                    return primitiveDefault(method.getReturnType());
+                });
+        return (Connection) Proxy.newProxyInstance(
+                Connection.class.getClassLoader(), new Class<?>[]{Connection.class},
+                (proxy, method, args) -> {
+                    if (method.getName().equals("isClosed")) return closed;
+                    if (method.getName().equals("prepareStatement")) {
+                        if (failPrepare) throw new SQLException("simulated SQL failure");
+                        return statement;
+                    }
+                    if (method.getName().equals("close")) return null;
+                    return primitiveDefault(method.getReturnType());
+                });
+    }
+
+    private java.util.Map<String, Object> row(Object... values) {
+        java.util.Map<String, Object> result = new java.util.HashMap<>();
+        for (int i = 0; i < values.length; i += 2) {
+            result.put((String) values[i], values[i + 1]);
+        }
+        return result;
+    }
+
+    @Test
+    void us27AndUs28_coverNoRowsNullPopulationAndSuccessfulRows() {
+        // No-row branch for US27 and US28.
+        Connection noRowsContinent = branchConnection(java.util.List.of(), false, false);
+        ViewPopulationOfAContinent_US27.getPopulationOfContinent(
+                noRowsContinent, "Atlantis");
+        assertTrue(out().contains(
+                "No population data available for continent: Atlantis"));
+
+        Connection noRowsRegion = branchConnection(java.util.List.of(), false, false);
+        ViewPopulationOfARegion_US28.getPopulationOfRegion(
+                noRowsRegion, "Unknown Region");
+        assertTrue(out().contains(
+                "No population data available for region: Unknown Region"));
+
+        // wasNull() branch for US27. Use an independent ResultSet and assertion
+        // so the result of one report cannot affect the other report's check.
+        out.reset();
+        Connection nullContinentPopulation = branchConnection(java.util.List.of(
+                row("TotalPopulation", null, "Continent", "Asia")), false, false);
+        ViewPopulationOfAContinent_US27.getPopulationOfContinent(
+                nullContinentPopulation, "Asia");
+        assertTrue(out().contains("No population data available for Asia."),
+                "US27 should handle SQL NULL population values");
+
+        // wasNull() branch for US28, with a Region column matching its query.
+        out.reset();
+        Connection nullRegionPopulation = branchConnection(java.util.List.of(
+                row("TotalPopulation", null, "Region", "Asia")), false, false);
+        ViewPopulationOfARegion_US28.getPopulationOfRegion(
+                nullRegionPopulation, "Asia");
+        assertTrue(out().contains(
+                        "No population data available for region: Asia"),
+                "US28 should handle SQL NULL population values");
+
+        // Successful-result branch for both reports.
+        out.reset();
+        Connection validContinent = branchConnection(java.util.List.of(
+                row("TotalPopulation", 123456L, "Continent", "Asia")), false, false);
+        ViewPopulationOfAContinent_US27.getPopulationOfContinent(
+                validContinent, "Asia");
+        assertTrue(out().contains("123,456"),
+                "US27 should display a non-null population");
+
+        out.reset();
+        Connection validRegion = branchConnection(java.util.List.of(
+                row("TotalPopulation", 123456L, "Region", "Asia")), false, false);
+        ViewPopulationOfARegion_US28.getPopulationOfRegion(
+                validRegion, "Asia");
+        assertTrue(out().contains("123,456"),
+                "US28 should display a non-null population");
+    }
+
+    @Test
+    void us31_coversClosedInvalidMissingNullPopulationAndSuccessfulCity() throws Exception {
+        ViewPopulationOfSelectedCity_US31 closed =
+                new ViewPopulationOfSelectedCity_US31(branchConnection(java.util.List.of(), true, false));
+        closed.run("Yangon", "Myanmar");
+        assertTrue(out().contains("Database connection is closed."));
+
+        ViewPopulationOfSelectedCity_US31 validConnection =
+                new ViewPopulationOfSelectedCity_US31(branchConnection(java.util.List.of(), false, false));
+        validConnection.run(null, "Myanmar");
+        validConnection.run("Yangon", " ");
+        assertTrue(out().contains("Please provide a valid city and country name."));
+
+        validConnection.run("Unknown", "Nowhere");
+        assertTrue(out().contains("No population data available for Unknown, Nowhere."));
+
+        ViewPopulationOfSelectedCity_US31 nullPopulation =
+                new ViewPopulationOfSelectedCity_US31(branchConnection(java.util.List.of(
+                        row("CityName", "Yangon", "CountryName", "Myanmar", "CityPopulation", null)), false, false));
+        nullPopulation.run("Yangon", "Myanmar");
+        assertTrue(out().contains("No population data available for Yangon, Myanmar."));
+
+        ViewPopulationOfSelectedCity_US31 success =
+                new ViewPopulationOfSelectedCity_US31(branchConnection(java.util.List.of(
+                        row("CityName", "Yangon", "CountryName", "Myanmar", "CityPopulation", 5000000L)), false, false));
+        success.run(" Yangon ", " Myanmar ");
+        assertTrue(out().contains("Cities displayed: 1"));
+        assertTrue(out().contains("5,000,000"));
+    }
+
+    @Test
+    void us31_propagatesSqlExceptionFromDatabase() {
+        ViewPopulationOfSelectedCity_US31 report =
+                new ViewPopulationOfSelectedCity_US31(branchConnection(java.util.List.of(), false, true));
+        assertThrows(SQLException.class, () -> report.run("Yangon", "Myanmar"));
+    }
+
+    @Test
+    void us32_coversClosedEmptyInvalidWorldPopulationAndMissingLanguageBranches() throws Exception {
+        US32_PopulationByLanguageReport closed = new US32_PopulationByLanguageReport(
+                branchConnection(java.util.List.of(), true, false));
+        closed.run();
+        assertTrue(out().contains("Database connection is closed."));
+
+        US32_PopulationByLanguageReport empty = new US32_PopulationByLanguageReport(
+                branchConnection(java.util.List.of(), false, false));
+        empty.run();
+        assertTrue(out().contains("No language population data is available."));
+
+        US32_PopulationByLanguageReport nullWorld = new US32_PopulationByLanguageReport(
+                branchConnection(java.util.List.of(row("LanguageName", "English",
+                        "TotalSpeakers", BigDecimal.TEN, "TotalWorldPopulation", null)), false, false));
+        nullWorld.run();
+        assertTrue(out().contains("World population data is unavailable or zero"));
+
+        US32_PopulationByLanguageReport zeroWorld = new US32_PopulationByLanguageReport(
+                branchConnection(java.util.List.of(row("LanguageName", "English",
+                        "TotalSpeakers", BigDecimal.TEN, "TotalWorldPopulation", BigDecimal.ZERO)), false, false));
+        zeroWorld.run();
+        assertTrue(out().contains("World population data is unavailable or zero"));
+
+        US32_PopulationByLanguageReport missingSpeaker = new US32_PopulationByLanguageReport(
+                branchConnection(java.util.List.of(
+                        row("LanguageName", "Chinese", "TotalSpeakers", null,
+                                "TotalWorldPopulation", new BigDecimal("1000")),
+                        row("LanguageName", "English", "TotalSpeakers", new BigDecimal("250.5"),
+                                "TotalWorldPopulation", new BigDecimal("1000"))), false, false));
+        missingSpeaker.run();
+        assertTrue(out().contains("N/A"));
+        assertTrue(out().contains("WARNING: No language data available for: Chinese"));
+        assertTrue(out().contains("25.05%"));
+    }
+
+    @Test
+    void us32_propagatesSqlExceptionAndValidatesNullAndNegativePercentageInputs() {
+        US32_PopulationByLanguageReport report = new US32_PopulationByLanguageReport(
+                branchConnection(java.util.List.of(), false, true));
+        assertThrows(SQLException.class, report::run);
+        assertThrows(IllegalArgumentException.class,
+                () -> US32_PopulationByLanguageReport.calculateWorldPercentage(null, BigDecimal.TEN));
+        assertThrows(IllegalArgumentException.class,
+                () -> US32_PopulationByLanguageReport.calculateWorldPercentage(BigDecimal.ONE, null));
+        assertThrows(IllegalArgumentException.class,
+                () -> US32_PopulationByLanguageReport.calculateWorldPercentage(BigDecimal.ONE, new BigDecimal("-1")));
+    }
+
+    @Test
+    void us04_coversEmptyResultsNullCapitalNullRegionAndSqlException() {
+        US04_view_top_n_countries_in_the_world.printReport(
+                branchConnection(java.util.List.of(), false, false), 5);
+        assertTrue(out().contains("No country records found."));
+
+        US04_view_top_n_countries_in_the_world.printReport(
+                branchConnection(java.util.List.of(row(
+                        "Code", "MMR", "Name", "Myanmar", "Continent", "Asia",
+                        "Region", null, "Population", 50000000L, "Capital", null)), false, false), 5);
+        assertTrue(out().contains("Unknown"));
+        assertTrue(out().contains("Countries displayed: 1"));
+
+        US04_view_top_n_countries_in_the_world.printReport(
+                branchConnection(java.util.List.of(), false, true), 5);
+        assertTrue(err().contains("Error retrieving top N countries: simulated SQL failure"));
+    }
+
 }
