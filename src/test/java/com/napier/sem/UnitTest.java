@@ -602,6 +602,11 @@ class UnitTest {
 
     @Test
     void us27AndUs28_coverNoRowsNullPopulationAndSuccessfulRows() {
+        ViewPopulationOfAContinent_US27.getPopulationOfContinent(null, "Asia");
+        ViewPopulationOfARegion_US28.getPopulationOfRegion(null, "Asia");
+        assertTrue(out().contains("Database connection is unavailable."));
+        out.reset();
+
         // No-row branch for US27 and US28.
         Connection noRowsContinent = branchConnection(java.util.List.of(), false, false);
         ViewPopulationOfAContinent_US27.getPopulationOfContinent(
@@ -663,6 +668,8 @@ class UnitTest {
         ViewPopulationOfSelectedCity_US31 validConnection =
                 new ViewPopulationOfSelectedCity_US31(branchConnection(java.util.List.of(), false, false));
         validConnection.run(null, "Myanmar");
+        validConnection.run(" ", "Myanmar");
+        validConnection.run("Yangon", null);
         validConnection.run("Yangon", " ");
         assertTrue(out().contains("Please provide a valid city and country name."));
 
@@ -755,6 +762,195 @@ class UnitTest {
         US04_view_top_n_countries_in_the_world.printReport(
                 branchConnection(java.util.List.of(), false, true), 5);
         assertTrue(err().contains("Error retrieving top N countries: simulated SQL failure"));
+    }
+
+
+    // =========================================================================
+    // Additional branch tests based on the current JaCoCo report
+    // =========================================================================
+
+    @Test
+    void app_databaseReady_returnsFalseWhenResultSetHasNoRow() throws Exception {
+        assertFalse(invokeDatabaseReady(readinessConnection(false, 0, false)));
+        assertTrue(err().contains("Missing required table: country"));
+    }
+
+    @Test
+    void app_connectToDatabase_returnsNullAfterAllConnectionAttemptsFail() throws Exception {
+        Method method = App.class.getDeclaredMethod(
+                "connectToDatabase", String.class, String.class, String.class);
+        method.setAccessible(true);
+
+        Object result = method.invoke(null,
+                "jdbc:branch-test-driver-does-not-exist:", "user", "password");
+
+        assertNull(result);
+        assertTrue(err().contains("Connection failed:"));
+        assertTrue(out().contains("attempt 20/20"));
+    }
+
+    @Test
+    void us05_coversEmptyResultsNullAndNonNullCapitalAndRegionAndSqlFailure() {
+        US05_view_top_n_countries_in_a_continent.printReport(null, null, 5);
+        assertTrue(err().contains("Please enter a valid continent."));
+
+        US05_view_top_n_countries_in_a_continent.printReport(
+                branchConnection(java.util.List.of(), false, false), "Atlantis", 5);
+        assertTrue(out().contains("No country records found for continent: Atlantis"));
+
+        Connection rows = branchConnection(java.util.List.of(
+                row("Code", "AAA", "Name", "No Capital", "Continent", "Asia",
+                        "Region", null, "Population", 100L, "Capital", null),
+                row("Code", "BBB", "Name", "With Capital", "Continent", "Asia",
+                        "Region", "South Asia", "Population", 200L, "Capital", "Delhi")
+        ), false, false);
+        US05_view_top_n_countries_in_a_continent.printReport(rows, " Asia ", 5);
+        assertTrue(out().contains("Unknown"));
+        assertTrue(out().contains("Delhi"));
+        assertTrue(out().contains("Countries displayed: 2"));
+
+        US05_view_top_n_countries_in_a_continent.printReport(
+                branchConnection(java.util.List.of(), false, true), "Asia", 5);
+        assertTrue(err().contains("Error retrieving top N countries in a continent:"));
+    }
+
+    @Test
+    void us06_coversEmptyResultsNullAndNonNullContinentAndCapitalAndSqlFailure() {
+        US06_view_top_n_countries_in_a_region.printReport(null, null, 5);
+        assertTrue(err().contains("Please enter a valid region."));
+
+        US06_view_top_n_countries_in_a_region.printReport(
+                branchConnection(java.util.List.of(), false, false), "Unknown Region", 5);
+        assertTrue(out().contains("No country records found for region: Unknown Region"));
+
+        Connection rows = branchConnection(java.util.List.of(
+                row("Code", "AAA", "Name", "No Capital", "Continent", null,
+                        "Region", "Asia", "Population", 100L, "Capital", null),
+                row("Code", "BBB", "Name", "With Capital", "Continent", "Asia",
+                        "Region", "South Asia", "Population", 200L, "Capital", "Delhi")
+        ), false, false);
+        US06_view_top_n_countries_in_a_region.printReport(rows, " South Asia ", 5);
+        assertTrue(out().contains("Unknown"));
+        assertTrue(out().contains("Delhi"));
+        assertTrue(out().contains("Countries displayed: 2"));
+
+        US06_view_top_n_countries_in_a_region.printReport(
+                branchConnection(java.util.List.of(), false, true), "Asia", 5);
+        assertTrue(err().contains("Error retrieving top N countries in a region:"));
+    }
+
+    @Test
+    void us12_coversEmptyResultsSuccessfulRowsAndSqlFailure() {
+        new ViewTopCitiesInTheWorld_US12(
+                branchConnection(java.util.List.of(), false, false))
+                .getTopNCitiesInWorld(5);
+        assertTrue(out().contains("No cities found."));
+
+        out.reset();
+        new ViewTopCitiesInTheWorld_US12(branchConnection(java.util.List.of(
+                row("CityName", "Yangon", "CountryName", "Myanmar",
+                        "District", "Yangon", "Population", 5000000L)
+        ), false, false)).getTopNCitiesInWorld(5);
+        assertTrue(out().contains("Yangon"));
+
+        out.reset();
+        new ViewTopCitiesInTheWorld_US12(
+                branchConnection(java.util.List.of(), false, true))
+                .getTopNCitiesInWorld(5);
+        assertTrue(out().contains("US12 Error: simulated SQL failure"));
+    }
+
+    @Test
+    void us20_and_us21_printReportsCoverNullAndNonNullDistricts() {
+        CapitalCity withoutDistrict = new CapitalCity();
+        withoutDistrict.setName("Capital A");
+        withoutDistrict.setCountry("Country A");
+        withoutDistrict.setDistrict(null);
+        withoutDistrict.setPopulation(1000L);
+
+        CapitalCity withDistrict = new CapitalCity();
+        withDistrict.setName("Capital B");
+        withDistrict.setCountry("Country B");
+        withDistrict.setDistrict("Central");
+        withDistrict.setPopulation(2000L);
+
+        ArrayList<CapitalCity> capitals = new ArrayList<>();
+        capitals.add(withoutDistrict);
+        capitals.add(withDistrict);
+
+        ViewTopNCapitalCitiesInTheWorld_US20.printReport(capitals, 2);
+        assertTrue(out().contains("Capital cities displayed: 2"));
+
+        out.reset();
+        ViewTopNCapitalCitiesInAContinent_US21.printReport(capitals, "Asia", 2);
+        assertTrue(out().contains("Capital cities displayed: 2"));
+    }
+
+    @Test
+    void us22_coversEveryInputDistrictAndResultCountBranch() {
+        ViewTopNCapitalCitiesInARegion_US22.generateReport(null, "Asia", 5);
+        ViewTopNCapitalCitiesInARegion_US22.generateReport(
+                branchConnection(java.util.List.of(), false, false), null, 5);
+        ViewTopNCapitalCitiesInARegion_US22.generateReport(
+                branchConnection(java.util.List.of(), false, false), "   ", 5);
+        ViewTopNCapitalCitiesInARegion_US22.generateReport(
+                branchConnection(java.util.List.of(), false, false), "Asia", 0);
+        assertTrue(out().contains("Database connection is not available."));
+        assertTrue(out().contains("Please provide a valid region."));
+        assertTrue(out().contains("Invalid N."));
+
+        out.reset();
+        ViewTopNCapitalCitiesInARegion_US22.generateReport(
+                branchConnection(java.util.List.of(), false, false), "No Such Region", 5);
+        assertTrue(out().contains("No capital cities found for region: No Such Region"));
+
+        out.reset();
+        ViewTopNCapitalCitiesInARegion_US22.generateReport(
+                branchConnection(java.util.List.of(
+                        row("city_name", "City Null District", "country_name", "Country A",
+                                "district_name", null, "city_population", 100L),
+                        row("city_name", "City Blank District", "country_name", "Country B",
+                                "district_name", "   ", "city_population", 200L),
+                        row("city_name", "City With District", "country_name", "Country C",
+                                "district_name", "Central", "city_population", 300L)
+                ), false, false), "Asia", 5);
+        assertTrue(out().contains("N/A"));
+        assertTrue(out().contains("Central"));
+        assertTrue(out().contains("Capital cities displayed: 3"));
+
+        out.reset();
+        ViewTopNCapitalCitiesInARegion_US22.generateReport(
+                branchConnection(java.util.List.of(), false, true), "Asia", 5);
+        assertTrue(out().contains("Database/report error: simulated SQL failure"));
+    }
+
+    @Test
+    void us23_coversEmptyRowsNullAggregateZeroAggregateAndValidAggregate() throws Exception {
+        PopulationByContinent_US023.generateReport(
+                branchConnection(java.util.List.of(), false, false));
+        assertTrue(out().contains("No population data is available."));
+
+        out.reset();
+        PopulationByContinent_US023.generateReport(branchConnection(java.util.List.of(
+                row("continent", "Asia", "total_population", 1000L,
+                        "city_population", null)
+        ), false, false));
+        assertTrue(out().contains("Population data unavailable for continent: Asia"));
+
+        out.reset();
+        PopulationByContinent_US023.generateReport(branchConnection(java.util.List.of(
+                row("continent", "Zero Continent", "total_population", 0L,
+                        "city_population", 0L)
+        ), false, false));
+        assertTrue(out().contains("Population data unavailable for continent: Zero Continent"));
+
+        out.reset();
+        PopulationByContinent_US023.generateReport(branchConnection(java.util.List.of(
+                row("continent", "Europe", "total_population", 1000L,
+                        "city_population", 400L)
+        ), false, false));
+        assertTrue(out().contains("40.00%"));
+        assertTrue(out().contains("Total continents displayed: 1"));
     }
 
 }
