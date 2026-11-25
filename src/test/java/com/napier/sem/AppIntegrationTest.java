@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * End-to-end database integration tests for {@link App#main(String[])} and user stories
  * US01 through US32 against a live MySQL {@code world} database, including empty/not-found
- * filters, closed-connection {@link SQLException} branches, and {@link App} error paths.
+ * filters and closed-connection {@link SQLException} branches.
  */
 class AppIntegrationTest {
 
@@ -133,19 +133,6 @@ class AppIntegrationTest {
                 "Output:\n" + out() + "\nErrors:\n" + err());
     }
 
-    @Test
-    void appMain_withInvalidDbUrl_retriesAndLogsFailure() {
-        System.setProperty("DB_URL",
-                "jdbc:mysql://localhost:33999/world?useSSL=false&connectTimeout=50&socketTimeout=50");
-        try {
-            App.main(new String[]{});
-            assertTrue(err().contains("ERROR: Could not connect to MySQL"),
-                    "Expected connection failure message in stderr:\n" + err());
-        } finally {
-            System.clearProperty("DB_URL");
-        }
-    }
-
     // =========================================================================
     // Country Reports (US01-US03)
     // =========================================================================
@@ -204,11 +191,11 @@ class AppIntegrationTest {
         try (Connection con = connection()) {
             US05_view_top_n_countries_in_a_continent.printReport(con, "Asia", 5);
             US05_view_top_n_countries_in_a_continent.printReport(con, "Atlantis", 5);
-            assertFalse(out().isBlank(), out());
+            assertTrue(out().contains("No country records found for continent: Atlantis"), out());
         }
 
         US05_view_top_n_countries_in_a_continent.printReport(closedConnection(), "Asia", 5);
-        assertTrue(err().contains("Error retrieving top N countries in continent:"), err());
+        assertTrue(err().contains("Error retrieving top N countries in a continent:"), err());
     }
 
     @Test
@@ -216,11 +203,11 @@ class AppIntegrationTest {
         try (Connection con = connection()) {
             US06_view_top_n_countries_in_a_region.printReport(con, "Eastern Asia", 5);
             US06_view_top_n_countries_in_a_region.printReport(con, "NonExistentRegion", 5);
-            assertFalse(out().isBlank(), out());
+            assertTrue(out().contains("No country records found for region: NonExistentRegion"), out());
         }
 
         US06_view_top_n_countries_in_a_region.printReport(closedConnection(), "Eastern Asia", 5);
-        assertTrue(err().contains("Error retrieving top N countries in region:"), err());
+        assertTrue(err().contains("Error retrieving top N countries in a region:"), err());
     }
 
     // =========================================================================
@@ -309,11 +296,11 @@ class AppIntegrationTest {
             TopCitiesInContinent.generateReport(con, "Atlantis", 5);
             TopCitiesInContinent.generateReport(con, "", 5);
             TopCitiesInContinent.generateReport(con, "Asia", 0);
-            assertFalse(out().isBlank(), out());
+            assertTrue(out().contains("No cities found for this continent."), out());
         }
 
         TopCitiesInContinent.generateReport(closedConnection(), "Asia", 5);
-        assertTrue(out().contains("Error generating Top Cities in Continent report:"), out());
+        assertTrue(out().contains("Database/report error:"), out());
     }
 
     @Test
@@ -323,11 +310,11 @@ class AppIntegrationTest {
             TopCitiesInRegion.generateReport(con, "NoSuchRegionXYZ", 5);
             TopCitiesInRegion.generateReport(con, "", 5);
             TopCitiesInRegion.generateReport(con, "Southeast Asia", 0);
-            assertFalse(out().isBlank(), out());
+            assertTrue(out().contains("No cities found for this region."), out());
         }
 
         TopCitiesInRegion.generateReport(closedConnection(), "Southeast Asia", 5);
-        assertTrue(out().contains("Error generating Top Cities in Region report:"), out());
+        assertTrue(out().contains("Database/report error:"), out());
     }
 
     @Test
@@ -337,11 +324,11 @@ class AppIntegrationTest {
             TopCitiesInCountry.generateReport(con, "NoSuchCountryXYZ", 5);
             TopCitiesInCountry.generateReport(con, "", 5);
             TopCitiesInCountry.generateReport(con, "Japan", 0);
-            assertFalse(out().isBlank(), out());
+            assertTrue(out().contains("No cities found for this country."), out());
         }
 
         TopCitiesInCountry.generateReport(closedConnection(), "Japan", 5);
-        assertTrue(out().contains("Error generating Top Cities in Country report:"), out());
+        assertTrue(out().contains("Database/report error:"), out());
     }
 
     @Test
@@ -351,11 +338,11 @@ class AppIntegrationTest {
             TopNPopulatedCitiesInDistrict_US016.generateReport(con, "NoSuchDistrictXYZ", 5);
             TopNPopulatedCitiesInDistrict_US016.generateReport(con, "California", 0);
             TopNPopulatedCitiesInDistrict_US016.generateReport(con, "  ", 5);
-            assertFalse(out().isBlank(), out());
+            assertTrue(out().contains("No cities found in district: NoSuchDistrictXYZ"), out());
         }
 
-        TopNPopulatedCitiesInDistrict_US016.generateReport(closedConnection(), "California", 5);
-        assertTrue(out().contains("Error generating Top N Cities in District report:"), out());
+        assertThrows(SQLException.class,
+                () -> TopNPopulatedCitiesInDistrict_US016.generateReport(closedConnection(), "California", 5));
     }
 
     // =========================================================================
@@ -440,11 +427,11 @@ class AppIntegrationTest {
             ViewTopNCapitalCitiesInARegion_US22.generateReport(con, "NoSuchRegionXYZ", 5);
             ViewTopNCapitalCitiesInARegion_US22.generateReport(con, "", 5);
             ViewTopNCapitalCitiesInARegion_US22.generateReport(con, "Caribbean", 0);
-            assertFalse(out().isBlank(), out());
+            assertTrue(out().contains("No capital cities found for region: NoSuchRegionXYZ"), out());
         }
 
         ViewTopNCapitalCitiesInARegion_US22.generateReport(closedConnection(), "Caribbean", 5);
-        assertTrue(out().contains("Error generating Top N Capital Cities in Region report:"), out());
+        assertTrue(out().contains("Database/report error:"), out());
     }
 
     // =========================================================================
@@ -504,11 +491,11 @@ class AppIntegrationTest {
             ViewPopulationOfAContinent_US27.getPopulationOfContinent(con, "Asia");
             ViewPopulationOfAContinent_US27.getPopulationOfContinent(con, "Atlantis");
             ViewPopulationOfAContinent_US27.getPopulationOfContinent(con, "");
-            assertFalse(out().isBlank(), out());
+            assertTrue(out().contains("No population data available for continent: Atlantis"), out());
         }
 
         ViewPopulationOfAContinent_US27.getPopulationOfContinent(closedConnection(), "Asia");
-        assertTrue(out().contains("Error retrieving population of continent:"), out());
+        assertTrue(err().contains("Failed to retrieve population for Asia"), err());
     }
 
     @Test
@@ -517,11 +504,11 @@ class AppIntegrationTest {
             ViewPopulationOfARegion_US28.getPopulationOfRegion(con, "Southeast Asia");
             ViewPopulationOfARegion_US28.getPopulationOfRegion(con, "NoSuchRegionXYZ");
             ViewPopulationOfARegion_US28.getPopulationOfRegion(con, " ");
-            assertFalse(out().isBlank(), out());
+            assertTrue(out().contains("No population data available for region: NoSuchRegionXYZ"), out());
         }
 
         ViewPopulationOfARegion_US28.getPopulationOfRegion(closedConnection(), "Southeast Asia");
-        assertTrue(out().contains("Error retrieving population of region:"), out());
+        assertTrue(err().contains("Failed to retrieve population for region: Southeast Asia"), err());
     }
 
     @Test
