@@ -6,7 +6,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Locale;
 
 /**
  * Application entry point for the report classes present in this project.
@@ -80,7 +79,7 @@ public class App {
 
             // US03 - View all countries in each region, ordered by population.
             runReport("US03 - View All Countries in a Region",
-                    () -> printCountriesByRegion(con));
+                    () -> US03_view_all_countries_in_a_region.printReport(con));
 
             // US04: View top N most populated countries in the world.
             runReport("US04 - Top N Most Populated Countries in the World",
@@ -96,7 +95,7 @@ public class App {
 
             // US07: View all cities in the world.
             runReport("US07 - View All Cities in the World",
-                    () -> printAllCities(con));
+                    () -> new ViewAllCitiesInTheWorld(con).getAllCitiesInWorld());
 
             // US08 - View all cities in a continent
             runReport("US08 - View All Cities in a Continent", () -> {
@@ -310,121 +309,6 @@ public class App {
         } catch (SQLException e) {
             System.err.println("Could not validate database tables: " + e.getMessage());
             return false;
-        }
-    }
-
-    /**
-     * US03: Query real country records, grouped by region and ordered by
-     * population descending within each region.
-     */
-    private static void printCountriesByRegion(Connection con) throws SQLException {
-        String sql = "SELECT c.Code, c.Name, c.Continent, c.Region, "
-                + "c.Population, capital.Name AS Capital "
-                + "FROM country c "
-                + "LEFT JOIN city capital ON c.Capital = capital.ID "
-                + "ORDER BY c.Region ASC, c.Population DESC, c.Name ASC";
-
-        String currentRegion = null;
-        String line = "-".repeat(125);
-        int count = 0;
-
-        try (PreparedStatement statement = con.prepareStatement(sql);
-             ResultSet rs = statement.executeQuery()) {
-
-            while (rs.next()) {
-                String region = rs.getString("Region");
-                if (region == null) {
-                    region = "Unknown";
-                }
-
-                if (!region.equals(currentRegion)) {
-                    if (currentRegion != null) {
-                        System.out.println(line);
-                    }
-                    currentRegion = region;
-                    System.out.println("\nRegion: " + currentRegion);
-                    System.out.println(line);
-                    System.out.printf(
-                            "| %-5s | %-24s | %-18s | %-28s | %15s | %-20s |%n",
-                            "Code", "Country", "Continent", "Region",
-                            "Population", "Capital"
-                    );
-                    System.out.println(line);
-                }
-
-                long population = rs.getLong("Population");
-                String capital = rs.getString("Capital");
-                if (capital == null) {
-                    capital = "Unknown";
-                }
-
-                System.out.printf(
-                        Locale.US,
-                        "| %-5s | %-24.24s | %-18.18s | %-28.28s | %,15d | %-20.20s |%n",
-                        rs.getString("Code"),
-                        rs.getString("Name"),
-                        rs.getString("Continent"),
-                        region,
-                        population,
-                        capital
-                );
-                count++;
-            }
-        }
-
-        if (count == 0) {
-            System.out.println("No country records found.");
-        } else {
-            System.out.println(line);
-            System.out.println("Countries displayed: " + count);
-        }
-    }
-
-    /**
-     * US07: Query and display every city in the database.
-     */
-    private static void printAllCities(Connection con) throws SQLException {
-        String sql = "SELECT city.Name AS CityName, country.Name AS CountryName, "
-                + "city.District AS DistrictName, "
-                + "city.Population AS CityPopulation "
-                + "FROM city "
-                + "JOIN country ON city.CountryCode = country.Code "
-                + "ORDER BY city.Population DESC, city.Name ASC";
-
-        int count = 0;
-        System.out.println("\nUS07 - All Cities in the World");
-        System.out.printf(
-                "%-35s %-45s %-30s %18s%n",
-                "City", "Country", "District", "Population"
-        );
-        System.out.println("-".repeat(135));
-
-        try (PreparedStatement statement = con.prepareStatement(sql);
-             ResultSet rs = statement.executeQuery()) {
-
-            while (rs.next()) {
-                City city = new City();
-                city.setName(rs.getString("CityName"));
-                city.setCountry(rs.getString("CountryName"));
-                city.setDistrict(rs.getString("DistrictName"));
-                city.setPopulation(rs.getLong("CityPopulation"));
-
-                System.out.printf(
-                        Locale.US,
-                        "%-35.35s %-45.45s %-30.30s %,18d%n",
-                        city.getName(),
-                        city.getCountry(),
-                        city.getDistrict() == null ? "" : city.getDistrict(),
-                        city.getPopulation()
-                );
-                count++;
-            }
-        }
-
-        if (count == 0) {
-            System.out.println("No city records found.");
-        } else {
-            System.out.println("Cities displayed: " + count);
         }
     }
 
