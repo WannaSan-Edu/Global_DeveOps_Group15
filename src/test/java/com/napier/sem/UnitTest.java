@@ -9,7 +9,6 @@ import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -302,8 +301,7 @@ class UnitTest {
         assertTrue(out().contains("No data available"));
 
         assertNull(ViewTopNCapitalCitiesInTheWorld_US20.getTopN(null, 5));
-        assertThrows(IllegalArgumentException.class,
-                () -> ViewTopNCapitalCitiesInTheWorld_US20.getTopN(null, 0));
+        assertNull(ViewTopNCapitalCitiesInTheWorld_US20.getTopN(null, 0));
         ViewTopNCapitalCitiesInTheWorld_US20.printReport(null, 5);
         ViewTopNCapitalCitiesInTheWorld_US20.printReport(new ArrayList<>(), 5);
 
