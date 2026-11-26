@@ -1,3 +1,4 @@
+
 package com.napier.sem;
 
 import org.junit.jupiter.api.AfterEach;
@@ -19,9 +20,14 @@ import java.util.Locale;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * End-to-end database integration tests for {@link App#main(String[])} and user stories
- * US01 through US32 against a live MySQL {@code world} database, exercising valid results,
- * empty/not-found results, invalid input branches, and closed-connection {@link SQLException} paths.
+ * Integration tests for the application using the real MySQL world database.
+ *
+ * Tests cover:
+ * - Application startup and command-line arguments.
+ * - User stories US01 to US32.
+ * - Valid and invalid inputs.
+ * - Empty database results.
+ * - Database connection errors.
  */
 class AppIntegrationTest {
 
@@ -31,6 +37,7 @@ class AppIntegrationTest {
     private ByteArrayOutputStream out;
     private ByteArrayOutputStream err;
 
+    // Save the original console settings and capture test output.
     @BeforeEach
     void captureConsole() {
         originalOut = System.out;
@@ -43,6 +50,7 @@ class AppIntegrationTest {
         System.setErr(new PrintStream(err, true, StandardCharsets.UTF_8));
     }
 
+    // Restore the original console settings after each test.
     @AfterEach
     void restoreConsole() {
         System.setOut(originalOut);
@@ -50,6 +58,7 @@ class AppIntegrationTest {
         Locale.setDefault(originalLocale);
     }
 
+    // Establish a connection to the real MySQL world database.
     private Connection connection() throws SQLException {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -64,6 +73,7 @@ class AppIntegrationTest {
         return DriverManager.getConnection(url, user, password);
     }
 
+    // Read database configuration from system properties or environment variables.
     private static String setting(String name, String fallback) {
         String value = System.getProperty(name);
         if (value == null || value.isBlank()) {
@@ -72,6 +82,7 @@ class AppIntegrationTest {
         return (value == null || value.isBlank()) ? fallback : value;
     }
 
+    // Execute a SQL query and return the first column of the first row.
     private long firstLong(Connection con, String sql) throws SQLException {
         try (Statement statement = con.createStatement(); ResultSet rs = statement.executeQuery(sql)) {
             if (!rs.next()) {
@@ -81,23 +92,28 @@ class AppIntegrationTest {
         }
     }
 
+    // Create a database connection and close it to test error handling.
     private Connection closedConnection() throws SQLException {
         Connection con = connection();
         con.close();
         return con;
     }
 
+    // Convert captured console output into a string.
     private String out() {
         return out.toString(StandardCharsets.UTF_8);
     }
 
+    // Convert captured error output into a string.
     private String err() {
         return err.toString(StandardCharsets.UTF_8);
     }
 
     // =========================================================================
-    // Application Entry Point Tests (App.main)
+    // 1. APPLICATION ENTRY POINT TESTS
     // =========================================================================
+    // Verify that App.main() connects to MySQL and executes reports
+    // using different command-line arguments.
 
     @Test
     void appMain_withCountryAndDistrictArgs_runsAllReports() {
@@ -134,8 +150,10 @@ class AppIntegrationTest {
     }
 
     // =========================================================================
-    // Country Reports (US01-US03)
+    // 2. COUNTRY REPORTS (US01–US03)
     // =========================================================================
+    // Test country reports using real database records.
+    // Verify successful results and closed-connection error handling.
 
     @Test
     void us01_reportsCountriesFromWorldDatabase_andClosedConnection() throws Exception {
@@ -172,8 +190,10 @@ class AppIntegrationTest {
     }
 
     // =========================================================================
-    // Top N Country Reports (US04-US06)
+    // 3. TOP N COUNTRY REPORTS (US04–US06)
     // =========================================================================
+    // Verify country ranking reports for the world, continents and regions.
+    // Test valid inputs, invalid locations, empty results and database errors.
 
     @Test
     void us04_returnsTopCountriesWorldwide_andClosedConnection() throws Exception {
@@ -211,8 +231,10 @@ class AppIntegrationTest {
     }
 
     // =========================================================================
-    // City Reports (US07-US12)
+    // 4. CITY REPORTS (US07–US12)
     // =========================================================================
+    // Test city reports using real MySQL data.
+    // Verify city listings, empty results and closed-connection handling.
 
     @Test
     void us07_listsCitiesWorldwide_andClosedConnection() throws Exception {
@@ -286,8 +308,10 @@ class AppIntegrationTest {
     }
 
     // =========================================================================
-    // Top N City Reports (US13-US16)
+    // 5. TOP N CITY REPORTS (US13–US16)
     // =========================================================================
+    // Test top-N city reports for continents, regions, countries and districts.
+    // Check valid inputs, invalid inputs and empty results.
 
     @Test
     void us13_returnsTopCitiesInAsia_emptyAndClosedConnection() throws Exception {
@@ -350,8 +374,10 @@ class AppIntegrationTest {
     }
 
     // =========================================================================
-    // Capital City Reports (US17-US22)
+    // 6. CAPITAL CITY REPORTS (US17–US22)
     // =========================================================================
+    // Verify capital city reports using real database records.
+    // Test ranking results, empty lists, invalid inputs and connection errors.
 
     @Test
     void us17_returnsAllCapitalCities_emptyAndClosedConnection() throws Exception {
@@ -441,8 +467,10 @@ class AppIntegrationTest {
     }
 
     // =========================================================================
-    // Population Breakdown & Total Reports (US23-US31)
+    // 7. POPULATION REPORTS (US23–US31)
     // =========================================================================
+    // Test population calculations by continent, region, country and district.
+    // Verify total population and selected-city population reports.
 
     @Test
     void us23_generatesPopulationBreakdownByContinent_andClosedConnection() throws Exception {
@@ -587,8 +615,10 @@ class AppIntegrationTest {
     }
 
     // =========================================================================
-    // Language Report (US32)
+    // 8. LANGUAGE REPORT (US32)
     // =========================================================================
+    // Verify population statistics grouped by language and
+    // check handling of a closed database connection.
 
     @Test
     void us32_reportsPopulationByLanguage_andClosedConnection() throws Exception {
@@ -614,4 +644,61 @@ class AppIntegrationTest {
                 "Output:\n" + out() + "\nErrors:\n" + err());
     }
 
+    // =========================================================================
+    // 9. ADDITIONAL LIVE DATABASE INTEGRATION TESTS
+    // =========================================================================
+    // Perform additional checks on aggregate and grouped reports.
+    // Confirm that reports work with the live MySQL world database.
+
+    // Verify population and country reports using actual MySQL database records.
+    @Test
+    void integration_populationAndCountryReports_useRealWorldDatabase() throws Exception {
+        try (Connection con = connection()) {
+            assertTrue(firstLong(con, "SELECT COUNT(*) FROM country") > 0);
+            assertTrue(firstLong(con, "SELECT COUNT(*) FROM city") > 0);
+
+            out.reset();
+            TotalWorldPopulation.printReport(con);
+            assertTrue(out().contains("TOTAL WORLD POPULATION REPORT"), out());
+
+            out.reset();
+            US01_view_all_countries_in_the_world.printReport(con);
+            assertTrue(out().contains("Countries displayed:"), out());
+
+            out.reset();
+            US02_view_all_countries_in_a_continent.printReport(con);
+            assertTrue(out().contains("Continent:"), out());
+
+            out.reset();
+            US03_view_all_countries_in_a_region.printReport(con);
+            assertTrue(out().contains("Region:"), out());
+
+            out.reset();
+            CountryPopulationReport countryReport = new CountryPopulationReport(con);
+            countryReport.run(" Myanmar ");
+            assertTrue(out().contains("Country Population Report"), out());
+
+            out.reset();
+            countryReport.run(" ");
+            assertTrue(out().contains("All Countries Population Report"), out());
+        }
+    }
+
+    // Verify city and country population reports using live database results.
+    @Test
+    void integration_us07AndUs25_handleLiveWorldDatabaseResults() throws Exception {
+        try (Connection con = connection()) {
+            out.reset();
+            new ViewAllCitiesInTheWorld(con).getAllCitiesInWorld();
+            assertTrue(out().contains("US07 - View all cities in the world"), out());
+            assertTrue(out().contains("Cities displayed:"), out());
+
+            out.reset();
+            var populations = ViewPopulationByCountry.getPopulationByCountry(con);
+            assertNotNull(populations);
+            assertFalse(populations.isEmpty());
+            ViewPopulationByCountry.printReport(populations);
+            assertTrue(out().contains("Total countries displayed:"), out());
+        }
+    }
 }

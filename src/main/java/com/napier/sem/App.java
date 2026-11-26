@@ -30,15 +30,7 @@ public class App {
         // Docker Compose: DB_HOST=db:3306
         // Running on the host machine: default localhost:33060
         String dbHost = System.getenv().getOrDefault("DB_HOST", "localhost:33060");
-        String dbUrl = System.getenv("DB_URL");
-
-        if (dbUrl == null || dbUrl.isBlank()) {
-            dbUrl = "jdbc:mysql://" + dbHost + "/world"
-                    + "?useSSL=false"
-                    + "&allowPublicKeyRetrieval=true"
-                    + "&connectTimeout=5000"
-                    + "&socketTimeout=30000";
-        }
+        String dbUrl = resolveDatabaseUrl(System.getenv("DB_URL"), dbHost);
 
         String dbUser = System.getenv().getOrDefault("DB_USER", "root");
         String dbPassword = System.getenv().getOrDefault("DB_PASSWORD", "example");
@@ -256,6 +248,21 @@ public class App {
         }
     }
 
+    /**
+     * Resolve the configured JDBC URL, using DB_HOST when DB_URL is absent
+     * or blank. Kept separate so the configuration branches can be unit tested.
+     */
+    static String resolveDatabaseUrl(String dbUrl, String dbHost) {
+        if (dbUrl == null || dbUrl.isBlank()) {
+            return "jdbc:mysql://" + dbHost + "/world"
+                    + "?useSSL=false"
+                    + "&allowPublicKeyRetrieval=true"
+                    + "&connectTimeout=5000"
+                    + "&socketTimeout=30000";
+        }
+        return dbUrl;
+    }
+
     private static Connection connectToDatabase(String dbUrl, String dbUser, String dbPassword) {
         for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
             System.out.println("Connecting to MySQL (attempt " + attempt + "/" + MAX_ATTEMPTS + ")...");
@@ -267,16 +274,16 @@ public class App {
             } catch (SQLException e) {
                 System.err.println("Connection failed: " + e.getMessage());
 
-                if (attempt == MAX_ATTEMPTS) {
-                    break;
-                }
-
-                try {
-                    Thread.sleep(RETRY_DELAY_MS);
-                } catch (InterruptedException interrupted) {
-                    Thread.currentThread().interrupt();
-                    System.err.println("Database retry was interrupted.");
-                    return null;
+                // Do not sleep after the final attempt. Let the for-loop
+                // condition become false naturally after MAX_ATTEMPTS.
+                if (attempt < MAX_ATTEMPTS) {
+                    try {
+                        Thread.sleep(RETRY_DELAY_MS);
+                    } catch (InterruptedException interrupted) {
+                        Thread.currentThread().interrupt();
+                        System.err.println("Database retry was interrupted.");
+                        return null;
+                    }
                 }
             }
         }
