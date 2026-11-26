@@ -80,3 +80,10 @@ jobs:
           docker compose up --abort-on-container-exit
       - name: view logs
         run: docker logs global_deveops_group15-app-1
+#      - uses: "marvinpinto/action-automatic-releases@latest"
+#        with:
+#            repo_token: "${{ secrets.GITHUB_TOKEN }}"
+#            prerelease: false
+#            automatic_release_tag: "latest"
+#            files: |
+#              ./target/*.jar
